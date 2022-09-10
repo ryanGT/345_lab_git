@@ -1,0 +1,6 @@
+copy_files.csv
+*_for_pdf*
+*.swp
+*.md
+*not_used*
+Untitled*.ipynb

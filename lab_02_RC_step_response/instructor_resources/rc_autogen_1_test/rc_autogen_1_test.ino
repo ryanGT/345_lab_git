@@ -23,6 +23,11 @@ byte inByte;
 /* saturation_block sat_block = saturation_block(&PD); */
 
 //bdsysinitcode
+step_input U = step_input(0.1, 100);
+pwm_output pwm_out_act = pwm_output(6);
+analog_sensor analog_in_sensor = analog_sensor(A0);
+plant G = plant(&pwm_out_act, &analog_in_sensor);
+
 
 //attachInterrupt(0, isr, FALLING);
 int nISR;
@@ -42,10 +47,12 @@ float t_ms, t_sec, prev_t, dt;
 void setup(){
    Serial.begin(115200);
    //bdsyswelcomecode
+   Serial.println("auto-generated Arduino code");
+
    Serial.println("using rtblockdiagram library");
    pinMode(squarewave_pin, OUTPUT);
 
-   
+
    //!// encoder pin on interrupt 0 (pin 2)
 
    // here is the setup code I should autogenerate:
@@ -53,7 +60,10 @@ void setup(){
    //HB.setup();
 
    //bdsyssetupcode
-   
+pwm_out_act.setup();
+G.set_input_block1(&U);
+
+
    //=======================================================
    // set up the Timer2 interrupt
    //=======================================================
@@ -90,6 +100,7 @@ void menu(){
   // reset encoders and t0 at the start of a test
   //enc.encoder_count = 0;
   //bdsysmenucode
+
   t0 = micros();
   ISR_Happened = 0;// clear flag and wait for next time step
   Serial.print("t0 =");
@@ -124,6 +135,10 @@ void loop(){
     /* G.send_command(motor_speed); */
 
     //bdsysloopcode
+U.find_output(t_sec);
+G.send_command();
+G.find_output(t_sec);
+
 
 
     //HB.send_command(motor_speed);
@@ -131,6 +146,9 @@ void loop(){
     Serial.print(t_ms);
 
     //bdsysprintcode
+   print_comma_then_int(U.read_output());
+   print_comma_then_int(G.read_output());
+
 
     //Serial.print(",");
     //Serial.print(dt,8);
@@ -150,18 +168,18 @@ void loop(){
     /* print_comma_then_float(PD.din_dt); */
     /* print_comma_then_int(G.read_output()); */
 
-    
+
     //Serial.print(",");
     //Serial.print(PD.prev_t,8);
     //Serial.print(",");
     //Serial.print(PD.dt,8);
-    
+
     //print_comma_then_int(enc.get_reading());
     mynewline();
 
     prev_t = t_sec;
     //PD.save_values(t_sec);
-    
+
   }
 }
 
@@ -170,9 +188,9 @@ ISR(TIMER2_COMPA_vect)
 {
   ISR_Happened = 1;
   nISR++;
-  
+
   //G.send_command(motor_speed);
-  
+
   if (ISRstate == 1){
     ISRstate = 0;
     digitalWrite(squarewave_pin, LOW);

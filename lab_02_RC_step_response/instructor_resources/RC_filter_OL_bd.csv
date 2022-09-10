@@ -1,0 +1,13 @@
+actuators
+pwm_output,pwm_out_act,pwm_pin:6
+
+sensors
+analog_input,analog_in_sensor,ai_pin:A0
+
+blocks
+block_type,variable_name,label,arduino_class,input_block1_name,input_block2_name,width,height,placement_type,abs_x,abs_y,rel_block_name,rel_pos,rel_distance,xshift,yshift,param1,param2,param3,param4,param5,param6,param7,param8,param9,param10
+step_input,U,$U(s)$,step_input,,,3,2,absolute,0.0,0.0,,,,,,on_time:0.1,amp:100,,,,,,,,
+plant,G,$G(s)$,plant,U,,3,2,relative,,,U,right,4.0,0.0,0.0,actuator_name:pwm_out_act,sensor_name:analog_in_sensor,,,,,,,,
+
+print blocks
+U,G
