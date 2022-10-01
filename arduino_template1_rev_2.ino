@@ -38,6 +38,7 @@ unsigned long t;
 unsigned long t1;
 unsigned long cur_t;
 float t_ms, t_sec, prev_t, dt;
+float stop_t = 3;
 
 void setup(){
    Serial.begin(115200);
@@ -106,16 +107,14 @@ void loop(){
       t += 65536;
     }
     t_ms = t/1000.0;
-
-    if (t_ms > 3000){
+    t_sec = t_ms/1000.0;
+    
+    if (t_sec > stop_t){
       G.send_command(0);
       menu();
     }
     else{
-        t_sec = t_ms/1000.0;
         dt = t_sec - prev_t;
-    
-    
     
         // here is the loop code I want to autogenerate:
         /* u.find_output(t_sec); */
