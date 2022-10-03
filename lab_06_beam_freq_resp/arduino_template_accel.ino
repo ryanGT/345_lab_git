@@ -219,7 +219,7 @@ void loop(){
     t_sec = t_ms/1000.0;
     dt = t_sec - prev_t;
 
-    if (t_ms > 3000){
+    if (t_sec > stop_t){
       G.send_command(0);
       menu();
     }
