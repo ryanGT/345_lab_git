@@ -153,11 +153,6 @@ void setup(){
     Serial.print("accel range: ");
     Serial.println(read_range);
 
-   Serial.print("kp = ");
-   Serial.println(PD.Kp);
-   Serial.print("kd = ");
-   Serial.println(PD.Kd);
-
    //!// encoder pin on interrupt 0 (pin 2)
 
    // here is the setup code I should autogenerate:
