@@ -4,7 +4,7 @@ if [ -d "Arduino" ];
 then
     echo "Arduino directory exists."
 else
-    mkdir "Arduino"
+    mkdir Arduino
     cd Arduino
     mkdir libraries
 fi
