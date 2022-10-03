@@ -122,6 +122,7 @@ unsigned long t;
 unsigned long t1;
 unsigned long cur_t;
 float t_ms, t_sec, prev_t, dt;
+float stop_t = 3.0;
 
 void setup(){
    Serial.begin(115200);
@@ -199,6 +200,7 @@ void menu(){
   //bdsysmenucode
 
   t0 = micros();
+  prev_t = t0;
   ISR_Happened = 0;// clear flag and wait for next time step
   Serial.print("t0 =");
   Serial.println(t0);
@@ -214,62 +216,60 @@ void loop(){
       t += 65536;
     }
     t_ms = t/1000.0;
+    t_sec = t_ms/1000.0;
+    dt = t_sec - prev_t;
 
     if (t_ms > 3000){
       G.send_command(0);
       menu();
     }
-    t_sec = t_ms/1000.0;
-    dt = t_sec - prev_t;
-
-
-
-    // here is the loop code I want to autogenerate:
-    /* u.find_output(t_sec); */
-    /* error = sum1.find_output(t_sec); */
-    /* raw_motor_speed = PD.get_output(t_sec); */
-    /* motor_speed = sat_block.get_output(t_sec); */
-    /* G.send_command(motor_speed); */
-
-    //bdsysloopcode
-   
-
-    //HB.send_command(motor_speed);
-    // print data
-    Serial.print(t_ms);
-
-    //bdsysprintcode
-
-    //Serial.print(",");
-    //Serial.print(dt,8);
-    //print_comma_then_int(u.get_output(t_sec));
-    //print_comma_then_int(G.get_output(t_sec));
-
-    // how do I decide what to print?
-    // - all blocks or only some?
-    //     - printing all can slow things down
-    //     - printing all might be confusing
-    // - call the get_output method?
-    //     - do I ever need float output?
-
-    /* print_comma_then_int(motor_speed); */
-    /* print_comma_then_int(raw_motor_speed); */
-    /* print_comma_then_int(PD.input_value); */
-    /* print_comma_then_float(PD.din_dt); */
-    /* print_comma_then_int(G.read_output()); */
-
-
-    //Serial.print(",");
-    //Serial.print(PD.prev_t,8);
-    //Serial.print(",");
-    //Serial.print(PD.dt,8);
-
-    //print_comma_then_int(enc.get_reading());
-    mynewline();
-
-    prev_t = t_sec;
-    //PD.save_values(t_sec);
-
+    else{
+      // here is the loop code I want to autogenerate:
+      /* u.find_output(t_sec); */
+      /* error = sum1.find_output(t_sec); */
+      /* raw_motor_speed = PD.get_output(t_sec); */
+      /* motor_speed = sat_block.get_output(t_sec); */
+      /* G.send_command(motor_speed); */
+  
+      //bdsysloopcode
+     
+  
+      //HB.send_command(motor_speed);
+      // print data
+      Serial.print(t_ms);
+  
+      //bdsysprintcode
+  
+      //Serial.print(",");
+      //Serial.print(dt,8);
+      //print_comma_then_int(u.get_output(t_sec));
+      //print_comma_then_int(G.get_output(t_sec));
+  
+      // how do I decide what to print?
+      // - all blocks or only some?
+      //     - printing all can slow things down
+      //     - printing all might be confusing
+      // - call the get_output method?
+      //     - do I ever need float output?
+  
+      /* print_comma_then_int(motor_speed); */
+      /* print_comma_then_int(raw_motor_speed); */
+      /* print_comma_then_int(PD.input_value); */
+      /* print_comma_then_float(PD.din_dt); */
+      /* print_comma_then_int(G.read_output()); */
+  
+  
+      //Serial.print(",");
+      //Serial.print(PD.prev_t,8);
+      //Serial.print(",");
+      //Serial.print(PD.dt,8);
+  
+      //print_comma_then_int(enc.get_reading());
+      mynewline();
+  
+      prev_t = t_sec;
+      //PD.save_values(t_sec);
+     }
   }
 }
 
