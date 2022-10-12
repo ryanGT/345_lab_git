@@ -31,6 +31,11 @@ int n_start = 10;
 int v;
 int stop_n = 200;// hard code this if you want to be lame
 
+int i_received;
+int myresponse;
+byte myr_lsb, myr_msb;
+
+
 unsigned long t0;
 unsigned long prev_t_micros;
 unsigned long t;
@@ -332,7 +337,7 @@ void loop()
     else if (inArray[0] == 3){
       pinISR();
       if (print_data){
-	//n_i2c, v1, v2, position, dt_micro
+	  //n_i2c, v1, v2, position, dt_micro
       	Serial.print(n_i2c);
       	print_comma_then_int(v1);
       	print_comma_then_int(v2);
@@ -344,6 +349,20 @@ void loop()
     else if (inArray[0] == 4){
       Serial.println("received cal command");
       calibrate_line_sensor();
+    }
+    else if (inArray[0] == 5){
+        // i2c communication test
+        // - bytes 0-3 are loaded else where
+        outArray[4] = inArray[1];
+        outArray[5] = inArray[2];
+        i_received = 256*inArray[1] + inArray[2];
+        myresponse = 10*i_received + 1;
+        myr_lsb = (byte)myresponse;
+        myr_msb = getsecondbyte(myresponse);
+        outArray[6] = myr_msb;
+        outArray[7] = myr_lsb;
+        //Serial.print("i = ");
+    
     }
     /* else if (inArray[0] == 3){ */
     /*   // main control case */
