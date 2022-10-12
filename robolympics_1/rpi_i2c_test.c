@@ -25,7 +25,7 @@ char inArray[in_bytes];
 char outArray[out_bytes];
 
 uint8_t lsb, msb;
-int myint, echo_int;
+int myint, echo_int, expected_resp;
 // compile cmd:
 // g++ -o wiringpi_multi_byte_attempt1.o wiringpi_multi_byte_attempt1.c -lwiringPi -li2c
 
@@ -89,10 +89,10 @@ int main (int argc, char **argv)
 
 
     if (inArray[4] != msb){
-        print("msb echo problem\n");
+        printf("msb echo problem\n");
     }
     if (inArray[5] != lsb){
-        print("lsb echo problem\n");
+        printf("lsb echo problem\n");
     }
     echo_int = 256*inArray[6] + inArray[7];
     expected_resp = myint*10+1;
