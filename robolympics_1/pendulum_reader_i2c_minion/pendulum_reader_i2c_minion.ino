@@ -52,13 +52,13 @@ void setup() {
 void loop() {
   delay(5);
   digitalWrite(13, LOW);
-  if (sent_data){ 
-      sent_data = false;
-      Serial.print(n_sent);
-      Serial.print(",");
-      Serial.print(encoder_count);
-      Serial.print('\n');
-  }
+  //if (sent_data){ 
+  //    sent_data = false;
+  //    Serial.print(n_sent);
+  //    Serial.print(",");
+  //    Serial.print(encoder_count);
+  //    Serial.print('\n');
+  //}
   //Serial.println(encoder_count);
 }
 
