@@ -9,7 +9,7 @@
 #include <linux/i2c-dev.h>
 #include <i2c/smbus.h>
 #include <unistd.h>
-#include "rpiblockdiagram/rpiblockdiagram.h"
+#include <rpiblockdiagram.h>
 
 void alarmWakeup(int sig_num);
 
@@ -255,20 +255,26 @@ int main (int argc, char **argv)
   char mychar;
   	
   if (calibrated == 0){
-    printf("press any character to calibrate\n");
+          printf("If the line sensor is not calibrated,\n you cannot use it (no line following).\n");
+    printf("do you want to calibrate the line sensor? (y/n)\n");
+
+    //printf("press any character to calibrate\n");
 
     mychar = getchar();
     printf("you pressed: %c", mychar);
-    send_cal_command();
+    if (mychar == 'y'){
+	printf("sending calibration command to Mega\n");
+        send_cal_command();
+	printf("done with menu and/or calibration\n");
+	calibrated = check_cal();
+        if (calibrated == 0){
+          printf("calibration failed, exiting");
+          return -1;
+        }
+    }
   };
   /*   // reset encoders and t0 at the start of a test */
 
-  printf("done with menu and/or calibration\n");
-  calibrated = check_cal();
-  if (calibrated == 0){
-      printf("calibration failed, exiting");
-      return -1;
-  }
   signal(SIGALRM, alarmWakeup);   
   ualarm(2000, 2000);//500 
 
