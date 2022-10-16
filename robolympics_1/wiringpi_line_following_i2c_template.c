@@ -271,6 +271,8 @@ int main (int argc, char **argv)
           printf("calibration failed, exiting");
           return -1;
         }
+	printf("enter any character to start the test\n");
+        mychar = getchar();
     }
   };
   /*   // reset encoders and t0 at the start of a test */

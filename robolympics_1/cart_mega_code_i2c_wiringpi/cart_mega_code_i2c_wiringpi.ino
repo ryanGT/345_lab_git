@@ -185,7 +185,8 @@ void setup()
   //attachInterrupt(digitalPinToInterrupt(18), pinISR, CHANGE);
 
   qtr.setTypeRC();
-  qtr.setSensorPins((const uint8_t[]){29,31,33,35,37,39,41}, SensorCount);
+  //qtr.setSensorPins((const uint8_t[]){29,31,33,35,37,39,41}, SensorCount);
+  qtr.setSensorPins((const uint8_t[]){27,29,31,33,35,37,39}, SensorCount);
   qtr.setEmitterPin(2);
 
   calibrated = 0;
