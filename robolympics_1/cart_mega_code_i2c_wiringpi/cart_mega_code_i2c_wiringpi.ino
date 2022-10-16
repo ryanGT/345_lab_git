@@ -102,7 +102,7 @@ void calibrate_line_sensor(){
   {
     // using j to alternate the rotation of the sensor over the line
     // for autocalibration
-    set_speeds(sign*150,-150*sign);
+    //set_speeds(sign*150,-150*sign);
     j++;
     if ( j >= 20 ){
       sign *= -1;

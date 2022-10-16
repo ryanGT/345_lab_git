@@ -255,7 +255,7 @@ int main (int argc, char **argv)
   char mychar;
   	
   if (calibrated == 0){
-          printf("If the line sensor is not calibrated,\n you cannot use it (no line following).\n");
+    printf("If the line sensor is not calibrated,\n you cannot use it (no line following).\n");
     printf("do you want to calibrate the line sensor? (y/n)\n");
 
     //printf("press any character to calibrate\n");
