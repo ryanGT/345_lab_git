@@ -35,6 +35,27 @@ int myint, echo_int, expected_resp;
 
 //uint32_t t1, t2, dt;
 
+void send_int(int fd, int int_in){
+    msb = (uint8_t)(int_in/256);
+    lsb = (uint8_t)int_in;
+        
+    outArray[0] = 5;//the i2c test case
+    outArray[1] = msb;
+    outArray[2] = lsb;
+    // Send data to arduino
+    //t1 = micros();
+    write(fd, outArray, out_bytes);
+    t2 = micros();
+    //dt_send = t2-t1;
+}
+
+int read_int(int fd){
+    read(fd, inArray, in_bytes);
+    int my_echo_int = 256*inArray[6] + inArray[7];
+    return(my_echo_int); 
+}
+
+
 int main (int argc, char **argv)
 {
   printf("at top of main\n");
@@ -60,48 +81,24 @@ int main (int argc, char **argv)
     int q;
     // send 5, msb, lsb
     // get back msb, lsb, msb2, lsb2 in spots 4-7
-    myint = 302;
-    msb = (uint8_t)(myint/256);
-    lsb = (uint8_t)myint;
+    for (q=302; q+=7; q< 500){
+        t1 = micros();
+	send_int(fd, q);
+        delay(100);
+        echo_int = read_int(fd);
+        expected_resp = q*10+1;
+
+        if (expected_resp == echo_int){
+            printf("echo int passed, q = %i\n", q);
+        }
+        else{
+            printf("problem with echo int; expected %i, recieved %i\n", expected_resp, echo_int);
+        }
         
-    outArray[0] = 5;//the i2c test case
-    outArray[1] = msb;
-    outArray[2] = lsb;
-    // Send data to arduino
-    t1 = micros();
-    write(fd, outArray, out_bytes);
-    t2 = micros();
-    dt_send = t2-t1;
-    printf("data sent\n");
-    printf("dt_send (micros): %i\n", dt_send);
-    delay(500);
-
-    read(fd, inArray, in_bytes);
-
-    printf("received:\n");
-    for (q=0; q<in_bytes; q++){
-       if ( q > 0){
-        printf(", ");
-      }
-      printf("%d",inArray[q]);
+	t2 = micros();
+        dt_send = t2-t1;
+        printf("dt_send (micros): %i\n", dt_send);
     }
-    printf("\n");
-
-
-    if (inArray[4] != msb){
-        printf("msb echo problem\n");
-    }
-    if (inArray[5] != lsb){
-        printf("lsb echo problem\n");
-    }
-    echo_int = 256*inArray[6] + inArray[7];
-    expected_resp = myint*10+1;
-    if (expected_resp == echo_int){
-        printf("echo int passed\n");
-    }
-    else{
-        printf("problem with echo int; expected %i, recieved %i\n", expected_resp, echo_int);
-    }
-    //fclose(fp);
+   //fclose(fp);
     return 0;
 }
