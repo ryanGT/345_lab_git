@@ -79,9 +79,11 @@ int main (int argc, char **argv)
     printf("sending data\n");
 
     int q;
+    int any_fail = 0;
+    int num_fail = 0;
     // send 5, msb, lsb
     // get back msb, lsb, msb2, lsb2 in spots 4-7
-    for (q=302; q+=7; q< 500){
+    for (q=302; q< 500; q+=7){
         t1 = micros();
 	send_int(fd, q);
         delay(100);
@@ -93,12 +95,17 @@ int main (int argc, char **argv)
         }
         else{
             printf("problem with echo int; expected %i, recieved %i\n", expected_resp, echo_int);
+	    any_fail = 1;
+	    num_fail +=1;
         }
         
 	t2 = micros();
         dt_send = t2-t1;
         printf("dt_send (micros): %i\n", dt_send);
     }
+    printf("any_fail = %i\n", any_fail);
+    printf("num_fail = %i\n", num_fail);
+
    //fclose(fp);
     return 0;
 }
