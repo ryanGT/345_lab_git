@@ -31,9 +31,9 @@ float t_ms, t_sec;
 uint16_t dt, dt_send, dt_receive;
 uint32_t send_total=0;
 float ave_send;
-const int N=1000;
-int i_echo[N];
-int two_byte_response[N];
+int N=1000;
+//int i_echo[N];
+//int two_byte_response[N];
 int enc_fd, mega_fd;
 int position;
 #define in_bytes 8
@@ -45,11 +45,12 @@ uint8_t enc_array[enc_bytes];
 
 uint8_t ilsb, imsb;
 uint8_t calibrated;
+float stop_t;
 
-float get_float(char * var_name){
+float get_float(const char* var_name){
   float out;
   printf("enter %s:\n", var_name);
-  scanf("%f", &out);  
+  scanf("%f", &out);
   return out;
 }
 
@@ -268,7 +269,7 @@ int main (int argc, char **argv)
     //printf("press any character to calibrate\n");
 
     mychar = getchar();
-    printf("you pressed: %c", mychar);
+    printf("you pressed: %c\n", mychar);
     if (mychar == 'y'){
 	printf("sending calibration command to Mega\n");
         send_cal_command();
@@ -287,13 +288,15 @@ int main (int argc, char **argv)
   signal(SIGALRM, alarmWakeup);   
   ualarm(2000, 2000);//500 
 
-  t0 = micros();
 
 
   //bdsysmenucode
 
+  N = (int)(stop_t*500);
 
   printf("at top of for loop\n");
+
+  t0 = micros();
 
   for (i=0;i<N;i++){
      // main control loop for test
