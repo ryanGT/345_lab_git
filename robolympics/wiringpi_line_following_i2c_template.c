@@ -46,6 +46,13 @@ uint8_t enc_array[enc_bytes];
 uint8_t ilsb, imsb;
 uint8_t calibrated;
 
+float get_float(char * var_name){
+  float out;
+  printf("enter %s:\n", var_name);
+  scanf("%f", &out);  
+  return out;
+}
+
 
 // pin #'s
 int isr_sw_pin = 0;
@@ -281,6 +288,10 @@ int main (int argc, char **argv)
   ualarm(2000, 2000);//500 
 
   t0 = micros();
+
+
+  //bdsysmenucode
+
 
   printf("at top of for loop\n");
 
