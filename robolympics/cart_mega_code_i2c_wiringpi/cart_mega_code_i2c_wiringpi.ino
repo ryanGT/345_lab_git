@@ -160,7 +160,9 @@ void setup()
   //bdsyswelcomecode
   Serial.println("Mega i2c code for RPI WiringPi C");
   Serial.println("version 1.0.1");
-  Serial.println("emitter pin 27");
+  Serial.println("- emitter pin 27");
+  Serial.println("- skip line sensor reading if not calibrated");
+  Serial.println("    - hard code position to 10,000 if not calibrated");
 
 
   pinMode(squarewave_pin, OUTPUT);
@@ -380,7 +382,12 @@ void loop()
     /*   digitalWrite(controlPin, LOW);   */
     /* } */
   }
-  position = qtr.readLineBlack(sensorValues);//<--- this will block the reading of new data
+  if (calibrated>0){
+  	position = qtr.readLineBlack(sensorValues);//<--- this will block the reading of new data
+  }
+  else{
+	position = 10000;
+  }
   n_loop++;
   // load data into array to send to upy
   outArray[0] = calibrated;
