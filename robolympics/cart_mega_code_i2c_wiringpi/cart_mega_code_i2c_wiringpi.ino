@@ -159,6 +159,9 @@ void setup()
 
   //bdsyswelcomecode
   Serial.println("Mega i2c code for RPI WiringPi C");
+  Serial.println("version 1.0.1");
+  Serial.println("emitter pin 27");
+
 
   pinMode(squarewave_pin, OUTPUT);
 
@@ -187,7 +190,7 @@ void setup()
   qtr.setTypeRC();
   //qtr.setSensorPins((const uint8_t[]){29,31,33,35,37,39,41}, SensorCount);
   qtr.setSensorPins((const uint8_t[]){27,29,31,33,35,37,39}, SensorCount);
-  qtr.setEmitterPin(2);
+  qtr.setEmitterPin(27);
 
   calibrated = 0;
 
