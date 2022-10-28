@@ -45,7 +45,7 @@ uint8_t enc_array[enc_bytes];
 
 uint8_t ilsb, imsb;
 uint8_t calibrated;
-float stop_t;
+float stop_t=5;
 
 float get_float(const char* var_name){
   float out;
