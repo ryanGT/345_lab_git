@@ -1,0 +1,17 @@
+actuators
+
+sensors
+
+blocks
+block_type,variable_name,label,arduino_class,input_block1_name,input_block2_name,width,height,placement_type,abs_x,abs_y,rel_block_name,rel_pos,rel_distance,xshift,yshift,param1,param2,param3,param4,param5,param6,param7,param8,param9,param10
+loop_count_block,loop_count,loop count,loop_count_block,,,3,2,absolute,0.0,0.0,,,,,,,,,,,,,,,
+int_constant_block,U500,500,int_constant_block,,,1.5,1.5,relative,,,loop_count,below,4,0,0,value:500,,,,,,,,,
+greater_than_block,gt_block,>,greater_than_block,loop_count,U500,1.5,1.5,relative,,,loop_count,right,4,0,-2,,,,,,,,,,
+if_block,if_then,if,if_block,U5,Uzero,1.5,3,relative,,,gt_block,right,6,0,-2,bool_input_name:gt_block,,,,,,,,,
+int_constant_block,U5,5,int_constant_block,,,1.5,1.5,relative,,,gt_block,below,4,1,0,value:5,,,,,,,,,
+int_constant_block,Uzero,0,int_constant_block,,,1.5,1.5,relative,,,U5,below,4,1,0,value:0,,,,,,,,,
+
+print blocks
+loop_count,gt_block,if_then
+
+menu_params
