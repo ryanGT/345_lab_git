@@ -266,9 +266,9 @@ int main (int argc, char **argv)
     printf("i2c comm chec:k\n");
 
     for (q=302; q< 500; q+=175){
-    	send_int(fd, q);
+    	send_int(mega_fd, q);
         delay(100);
-        echo_int = read_int(fd);
+        echo_int = read_int(mega_fd);
         expected_resp = q*10+1;
 
         if (expected_resp == echo_int){
