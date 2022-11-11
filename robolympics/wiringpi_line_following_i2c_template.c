@@ -46,6 +46,7 @@ uint8_t enc_array[enc_bytes];
 uint8_t ilsb, imsb;
 uint8_t calibrated;
 float stop_t=5;
+uint8_t lsb, msb;
 
 float get_float(const char* var_name){
   float out;
@@ -281,7 +282,7 @@ int main (int argc, char **argv)
 
     if (any_fail > 0){
 	printf("i2c comm test failed, exiting\n");
-	printf("you probably need to power cycle your Arduino Mega"\n);
+	printf("you probably need to power cycle your Arduino Mega\n");
 	return(-1);
     }
 
