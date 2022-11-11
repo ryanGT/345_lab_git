@@ -22,7 +22,7 @@ myfile = txt_mixin.txt_file_with_list(mypath)
 #     - even if they are on two separate lines?
 
 pat1 = "i2c_arm=on"
-pat2 = "i2c_arm_baudrate=400000"
+pat2 = "i2c_baudrate=400000"
 
 
 pat_list = [pat1, pat2]
@@ -52,7 +52,7 @@ elif 1 in failed_cases:
     assert Ninds == 1, "len(inds) = %i, somthing is wrong" % Ninds
     ind = inds[0]
     good_line = "dtparam=i2c_arm=on,i2c_arm_baudrate=400000"
-    mylist.list[ind] = good_line
+    myfile.list[ind] = good_line
     myfile.save(mypath)
 
 
