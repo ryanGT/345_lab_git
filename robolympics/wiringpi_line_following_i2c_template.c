@@ -210,6 +210,28 @@ void mynewline(){
     printf("\n");
 }
 
+
+void send_int(int fd, int int_in){
+    msb = (uint8_t)(int_in/256);
+    lsb = (uint8_t)int_in;
+        
+    outArray[0] = 5;//the i2c test case
+    outArray[1] = msb;
+    outArray[2] = lsb;
+    // Send data to arduino
+    //t1 = micros();
+    write(fd, outArray, out_bytes);
+    t2 = micros();
+    //dt_send = t2-t1;
+}
+
+int read_int(int fd){
+    read(fd, inArray, in_bytes);
+    int my_echo_int = 256*inArray[6] + inArray[7];
+    return(my_echo_int); 
+}
+
+
 //uint32_t t1, t2, dt;
 
 int main (int argc, char **argv)
@@ -233,6 +255,35 @@ int main (int argc, char **argv)
     std::cout << "Encoder Uno I2C communication successfully setup.\n";
 
     printf("enc_fd: %i\n", enc_fd);   	
+
+    // i2c comm check
+    int q;
+    int any_fail = 0;
+    int num_fail = 0;
+ 
+    printf("i2c comm chec:k\n");
+
+    for (q=302; q< 500; q+=175){
+    	send_int(fd, q);
+        delay(100);
+        echo_int = read_int(fd);
+        expected_resp = q*10+1;
+
+        if (expected_resp == echo_int){
+            printf("echo int passed, q = %i\n", q);
+        }
+        else{
+            printf("problem with echo int; expected %i, recieved %i\n", expected_resp, echo_int);
+	    any_fail = 1;
+	    num_fail +=1;
+        }
+     }
+
+    if (any_fail > 0){
+	printf("i2c comm test failed, exiting\n");
+	printf("you probably need to power cycle your Arduino Mega"\n);
+	return(-1);
+    }
 
     FILE * fp;
 
