@@ -211,6 +211,7 @@ void mynewline(){
     printf("\n");
 }
 
+int echo_int, expected_resp;
 
 void send_int(int fd, int int_in){
     msb = (uint8_t)(int_in/256);
