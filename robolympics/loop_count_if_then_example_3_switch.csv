@@ -1,0 +1,24 @@
+actuators
+
+sensors
+custom_sensor,line_sense,arduino_class:line_sense_i2c,init_params:
+custom_sensor,pend_enc,arduino_class:pendulum_encoder,init_params:
+
+blocks
+block_type,variable_name,label,arduino_class,input_block1_name,input_block2_name,width,height,placement_type,abs_x,abs_y,rel_block_name,rel_pos,rel_distance,xshift,yshift,param1,param2,param3,param4,param5,param6,param7,param8,param9,param10
+loop_count_block,loop_count,loop count,loop_count_block,,,3,2,absolute,0.0,0.0,,,,,,,,,,,,,,,
+int_constant_block,U500,500,int_constant_block,,,1.5,1.5,relative,,,gt_block,left,3,0,-2,value:500,,,,,,,,,
+greater_than_block,gt_block,>,greater_than_block,loop_count,U500,3,3,relative,,,loop_count,right,6,0,-2,,,,,,,,,,
+if_block,if_then,if,if_block,U150,Uzero,1.5,3,relative,,,switchBlock,right,6.0,0.0,-2.0,bool_input_name:switchBlock,,,,,,,,,
+int_constant_block,Uzero,0,int_constant_block,,,1.5,1.5,relative,,,U150,below,4,1,0,value:0,,,,,,,,,
+cart_pendulum,G_cart,$G_{cart}$,plant_with_i2c_double_actuator_and_two_sensors,if_then,if_then,3,2,relative,,,if_then,right,4,0,0,sensor1_name:line_sense,sensor2_name:pend_enc,send_address:7,,,,,,,
+and_block,andBlock,and,and_block,gt_block,lt_block,3,3,relative,,,gt_block,right,4,0,-2,,,,,,,,,,
+less_than_block,lt_block,<,less_than_block,loop_count,U550,3,3,relative,,,gt_block,below,6,0,0,,,,,,,,,,
+int_constant_block,U550,550,int_constant_block,,,1.5,1.5,relative,,,lt_block,left,4,0,-2,value:550,,,,,,,,,
+int_constant_block,U150,150,int_constant_block,,,1.5,1.5,relative,,,if_then,left,4,1,0,value:150,,,,,,,,,
+switch_block,switchBlock,switch,,andBlock,,7,2,relative,,,andBlock,right,8.0,0.0,0.0,,,,,,,,,,
+
+print blocks
+loop_count,gt_block,if_then
+
+menu_params
