@@ -34,7 +34,7 @@ def _get_time(data,time_col=1):
     return time
 
 
-def _find_start_max_and_settle_inds(data,enc_col=1,vib_on_col=2):
+def _find_start_max_and_settle_inds(data,enc_col,vib_on_col):
     encoder = data[:,enc_col]
     # analysis starts when vib_on_col goes to 1
     vib_on = data[:,vib_on_col]
@@ -55,7 +55,7 @@ def _find_start_max_and_settle_inds(data,enc_col=1,vib_on_col=2):
 
 
 
-def calc_settling_time_event_1(data,time_col=1,enc_col=1,vib_on_col=2):
+def calc_settling_time_event_1(data,enc_col,vib_on_col,time_col=1):
     time = _get_time(data,time_col)
     start_ind, max_ind, settle_ind = _find_start_max_and_settle_inds(data, \
                                                                      enc_col=enc_col,\
@@ -70,7 +70,7 @@ def calc_settling_time_event_1(data,time_col=1,enc_col=1,vib_on_col=2):
 
 
 
-def plot_settling_time_fig(data,time_col=1,enc_col=1,vib_on_col=2):
+def plot_settling_time_fig(data,time_col=1,enc_col=-1,vib_on_col=-2):
     time = _get_time(data, time_col=time_col)
     encoder = data[:,enc_col]
     vib_on = data[:,vib_on_col]
@@ -78,9 +78,14 @@ def plot_settling_time_fig(data,time_col=1,enc_col=1,vib_on_col=2):
     if np.max(np.abs(vib_on)) < 10:
         vib_on *= 100
     
-    start_ind, max_ind, settle_ind = _find_start_max_and_settle_inds(data)
+    start_ind, max_ind, settle_ind = _find_start_max_and_settle_inds(data, \
+            enc_col=enc_col, vib_on_col=vib_on_col)
+           
     start_enc = encoder[max_ind]
+    print("max/start encoder value: %i" % start_enc)
     settle_enc = np.abs(0.04*start_enc)
+    print("settled encoder value: %i" % settle_enc)
+ 
     
     plt.figure()
     plt.plot(time,encoder,label='Pend. Encoder')
