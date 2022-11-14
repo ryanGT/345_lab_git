@@ -20,7 +20,6 @@ int ISRstate = 0;
 int nISR = 0;
 int i;
 
-int myreading;
 
 #define MEGA_ID 0x07
 #define UNO_ID 0x08
@@ -38,7 +37,7 @@ int N=1000;
 int enc_fd, mega_fd;
 int position;
 #define in_bytes 8
-#define out_bytes 8
+#define out_bytes 2
 uint8_t inArray[in_bytes];
 uint8_t outArray[out_bytes];
 #define enc_bytes 2
@@ -158,6 +157,17 @@ int read_int(int fd){
     return(my_echo_int); 
 }
 
+void read_encoder_N_times(int N){
+    int q;
+    int myreading;
+    
+    for (q=0; q<N; q++){
+	myreading = read_encoder_i2c();
+	printf("%d, %d\n", q, myreading);
+        delay(50);
+    }
+}
+
 
 //uint32_t t1, t2, dt;
 
@@ -177,18 +187,24 @@ int main (int argc, char **argv)
 
     printf("enc_fd: %i\n", enc_fd);   	
 
-    // i2c comm check
-    int q;
-    int any_fail = 0;
-    int num_fail = 0;
- 
     printf("Before zeroing encoder readings:\n");
 
-    for (q=0; q<10; q++){
-	myreading = read_encoder_i2c();
-	printf("%d, %d\n", q, myreading);
-        delay(50);
-    }
+    read_encoder_N_times(10);
+
+    // sending anything to the Uno over i2c should trigger an
+    // encoder zeroing
+
+    outArray[0] = 50;
+    outArray[1] = 51;
+    write(enc_fd, outArray, out_bytes);
+
+    delay(100);
+
+    printf("After zeroing encoder readings:\n");
+
+    read_encoder_N_times(10);
+
+   	
 
     return 0;
 }
