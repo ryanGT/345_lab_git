@@ -14,11 +14,17 @@ import control
 from numpy import sin, cos, tan, pi
 #from control import TransferFunction as TF
 
+import matplotlib
+rcfname = matplotlib.matplotlib_fname()
+print("rcfname: %s" % rcfname)
+
 import os, glob
 
 plt.rcParams['font.size'] = 14
 
 
+backend = plt.rcParams['backend']
+print("backend: %s" % backend)
 
 def _get_time(data,time_col=1):
     time = data[:,time_col]
@@ -129,7 +135,7 @@ def load_column_labels(datafile):
 def find_col(mylabels, vib_label="vib_on"):
     msg = "%s not in column labels:\n %s" % (vib_label, mylabels)
     assert vib_label in mylabels, msg
-    vib_ind = mylabel.index(vib_label)
+    vib_ind = mylabels.index(vib_label)
     return vib_ind
 
 
