@@ -60,7 +60,7 @@ def calc_settling_time_event_1(data,time_col=1,enc_col=1,vib_on_col=2):
     start_ind, max_ind, settle_ind = _find_start_max_and_settle_inds(data, \
                                                                      enc_col=enc_col,\
                                                                      vib_on_col=vib_on_col)
-    if settle_ind >= len(time):
+    if settle_ind >= len(time)-5:
         # did not settle
         print("did not settle")
         return 1e6
@@ -144,5 +144,13 @@ mylabels = load_column_labels(datafile)
 vib_col = find_col(mylabels, "vib_on")
 pend_col = find_col(mylabels, "pend_enc")
 
+print("\n"*2)
+
 plot_settling_time_fig(data,time_col=1,enc_col=pend_col,vib_on_col=vib_col)
+
+ts = calc_settling_time_event_1(data,time_col=1, \
+                                enc_col=pend_col, \
+                                vib_on_col=vib_col)
+print("settling time: %0.6g" % ts)
+
 plt.show()
