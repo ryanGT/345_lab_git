@@ -284,6 +284,7 @@ int main (int argc, char **argv)
     if (any_fail > 0){
 	printf("i2c comm test failed, exiting\n");
 	printf("you probably need to power cycle your Arduino Mega\n");
+    printf("or execute the command echo_performance.sh\n");
 	return(-1);
     }
 
