@@ -4,3 +4,4 @@ copy_files.csv
 *.md
 *not_used*
 Untitled*.ipynb
+*.o
