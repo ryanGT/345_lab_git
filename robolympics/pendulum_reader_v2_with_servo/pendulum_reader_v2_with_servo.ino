@@ -93,10 +93,11 @@ void requestEvent() {
 
 void receiveEvent(int howMany)
 {
+  byte c;
   digitalWrite(13, HIGH);
   while(Wire.available() > 0) // loop through all but the last
   {
-    char c = Wire.read(); // receive byte as a character
+    c = Wire.read(); // receive byte as a character
     Serial.print(c);         // print the character
   }
   if (c == 50){
