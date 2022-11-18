@@ -37,7 +37,7 @@ int N=1000;
 int enc_fd, mega_fd;
 int position;
 #define in_bytes 8
-#define out_bytes 2
+#define out_bytes 1
 uint8_t inArray[in_bytes];
 uint8_t outArray[out_bytes];
 #define enc_bytes 2
@@ -195,7 +195,7 @@ int main (int argc, char **argv)
     // encoder zeroing
 
     outArray[0] = 50;
-    outArray[1] = 51;
+    //outArray[1] = 51;
     write(enc_fd, outArray, out_bytes);
 
     delay(100);
