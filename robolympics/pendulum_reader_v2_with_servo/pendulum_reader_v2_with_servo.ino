@@ -101,15 +101,15 @@ void receiveEvent(int howMany)
     Serial.print(c);         // print the character
   }
   if (c == 50){
-    Serial.println("zeroiing");
+    //Serial.println("zeroiing");
     encoder_count = 0;
   }
   else if(c == 100){
-    Serial.println("sending servo to 0 degrees");
+    //Serial.println("sending servo to 0 degrees");
     myservo.write(0);
   }
   else if(c == 200){
-    Serial.println("sending servo to 180 degrees");
+    //Serial.println("sending servo to 180 degrees");
     myservo.write(180);
   }
   n_sent = 0;
