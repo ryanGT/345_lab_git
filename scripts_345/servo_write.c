@@ -215,6 +215,7 @@ int main (int argc, char **argv)
     if ((servo_angle >= 0) && (servo_angle <= 180)){
     	printf("sending servo to %d:\n", servo_angle);
     	send_byte(servo_angle);
+    }
     else{
 	printf("servo_angle not understood: %d\n", servo_angle);
     }
