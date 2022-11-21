@@ -187,24 +187,9 @@ int main (int argc, char **argv)
 
     printf("enc_fd: %i\n", enc_fd);   	
 
-    printf("Before zeroing encoder readings:\n");
+    printf("encoder readings:\n");
 
     read_encoder_N_times(10);
-
-    // sending anything to the Uno over i2c should trigger an
-    // encoder zeroing
-
-    outArray[0] = 250;
-    //outArray[1] = 51;
-    write(enc_fd, outArray, out_bytes);
-
-    delay(100);
-
-    printf("After zeroing encoder readings:\n");
-
-    read_encoder_N_times(10);
-
-   	
 
     return 0;
 }
