@@ -38,7 +38,7 @@ void setup() {
 
   //bdsyswelcomecode
   Serial.println("pendulum encoder minion i2c");
-  Serial.println("- version 2.0 now with servo");
+  Serial.println("- version 2.0.1 now with servo");
  //Serial.begin(230400);
 
   myservo.attach(12);  // attaches the servo on pin 9 to the servo object
@@ -105,7 +105,7 @@ void receiveEvent(int howMany)
     encoder_count = 0;
   }
   else if(c <= 180){
-    //Serial.println("sending servo to 0 degrees");
+    Serial.println(c);
     //myservo.write(0);
     myservo.write(c);
   }
