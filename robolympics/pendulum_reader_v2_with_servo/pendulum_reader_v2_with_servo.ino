@@ -106,7 +106,8 @@ void receiveEvent(int howMany)
   }
   else if(c == 100){
     //Serial.println("sending servo to 0 degrees");
-    myservo.write(0);
+    //myservo.write(0);
+    myservo.write(180);
   }
   else if(c == 200){
     myservo.write(90);
