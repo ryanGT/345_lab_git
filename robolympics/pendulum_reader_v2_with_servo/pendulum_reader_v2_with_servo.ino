@@ -41,7 +41,7 @@ void setup() {
   Serial.println("- version 2.0 now with servo");
  //Serial.begin(230400);
 
-  myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+  myservo.attach(12);  // attaches the servo on pin 9 to the servo object
 
   pinMode(13, OUTPUT);
   digitalWrite(13, LOW);
