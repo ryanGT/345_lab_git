@@ -1,0 +1,3 @@
+csv_path:/home/pi/345_lab_git/robolympics/prev_hold_test/prev_hold_test_bd.csv
+rpi_template_path:/home/pi/345_lab_git/robolympics/wiringpi_line_following_i2c_template.c
+rpi_output_path:/home/pi/345_lab_git/robolympics/prev_hold_test/prev_hold_test.c
