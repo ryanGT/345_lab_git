@@ -185,7 +185,7 @@ void pinISR()
     n_i2c = 256*n_msb + n_lsb;
     cmd_msb = inArray[3];
     cmd_lsb = inArray[4];
-    cmd = reassemblebytes(v1_msb,v1_lsb);
+    cmd = reassemblebytes(cmd_msb,cmd_lsb);
     // load up outArray to acknowledge what we have received
     // - is it better to have the Arduino respond by echoing the 
     //   n it received or its own n_loop?
@@ -193,8 +193,8 @@ void pinISR()
     // - where and when does outArray get loaded?
     // - when and where do we read the sensor?
     // - when and where do we send the cmd to the plant?
-    outArray[0] = sensor_msb
-    outArray[1] = sensor_lsb
+    outArray[0] = sensor_msb;
+    outArray[1] = sensor_lsb;
     outArray[2] = n_msb;
     outArray[3] = n_lsb;
     dt_micro_lsb = (byte)dt_micro;
@@ -251,9 +251,7 @@ void loop()
     }
     else if (inArray[0] == 2){
       // end test
-      stop_motors();
-      v1 = 0;
-      v2 = 0;
+      // probably send zero to actuator
     }
 
     else if (inArray[0] == 3){
@@ -261,16 +259,10 @@ void loop()
       if (print_data){
 	  //n_i2c, v1, v2, position, dt_micro
       	Serial.print(n_i2c);
-      	print_comma_then_int(v1);
-      	print_comma_then_int(v2);
-      	print_comma_then_int(position);
+      	print_comma_then_int(cmd);
       	print_comma_then_int(dt_micro);
       	mynewline();
       }
-    }
-    else if (inArray[0] == 4){
-      Serial.println("received cal command");
-      calibrate_line_sensor();
     }
     else if (inArray[0] == 5){
         // i2c communication test
