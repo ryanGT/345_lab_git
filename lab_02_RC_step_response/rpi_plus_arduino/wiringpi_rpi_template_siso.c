@@ -34,18 +34,14 @@ float ave_send;
 int N=1000;
 //int i_echo[N];
 //int two_byte_response[N];
-int enc_fd, mega_fd;
+int uno_fd;
 int position;
-#define in_bytes 8
-#define out_bytes 8
+#define in_bytes 6
+#define out_bytes 5
 uint8_t inArray[in_bytes];
 uint8_t outArray[out_bytes];
-uint8_t servoArray[1];
-#define enc_bytes 2
-uint8_t enc_array[enc_bytes];
 
 uint8_t ilsb, imsb;
-uint8_t calibrated;
 float stop_t=5;
 uint8_t lsb, msb;
 
@@ -95,35 +91,6 @@ int reassemblebytes(uint8_t msb, uint8_t lsb){
 //   set inside main before they are used?
 //   - is that better? 
 
-int read_encoder_i2c(){
-  int out;
-
-  read(enc_fd, enc_array, enc_bytes);
-  out = reassemblebytes(enc_array[0],enc_array[1]);
-  if (out > 32000){
-     out -= 65536;
-  } 
-  //out = 7;//not reading the encoder for now
-  return(out);
-}
-
-class pendulum_encoder: public sensor{
-  // a valid sensor class must have a get_reading method with no
-  // inputs that returns an int (the sensor reading)
- public:
-  int output;
-
-  pendulum_encoder(){};
-
-  int get_reading(){
-    // this will cause the value to be re-read over i2c whenever it is
-    // needed.....
-    output = read_encoder_i2c();
-    return(output);
-  };
-};
-
-
 // mega i2c
 // - addr is 0x07
 // - byte 0 is always calibrated variable:
@@ -145,64 +112,6 @@ class pendulum_encoder: public sensor{
 //     and then use bytes 2 and 3
 //   - a check_cal function should read the buffer and return byte 0
 
-#define line_bytes 8
-uint8_t line_sensor_buf[line_bytes];
-int line_sense_addr=7;
-
-void read_line_sensor_i2c_buf(){
-
-  read(mega_fd, line_sensor_buf, line_bytes);
-}
-
-
-
-int read_line_position(){
-  read_line_sensor_i2c_buf();
-  position = line_sensor_buf[2]*256 + line_sensor_buf[1];
-  return(position);
-}
-
-
-class line_sense_i2c: public sensor{
-  // a valid sensor class must have a get_reading method with no
-  // inputs that returns an int (the sensor reading)
- public:
-  int output;
-
-  line_sense_i2c(){};
-
-  int get_reading(){
-    // this will cause the value to be re-read over i2c whenever it is
-    // needed.....
-    output = read_line_position();
-    return(output);
-  };
-};
-
-//bdsysinitcode
-
-
-uint8_t check_cal(){
-  read_line_sensor_i2c_buf();
-  return line_sensor_buf[0];
-}
-
-
-int send_cal_command(){
-  printf("sending cal command\n");
-  G_cart.send_cal_cmd();
-  delay(2000);
-  for (int k=0; k<20; k++){
-    delay(500);
-    calibrated = check_cal();
-    printf("k = %i, calibrated = %i\n", k, calibrated);
-    if (calibrated == 1){
-      break;
-    }
-  }
-  return(calibrated);
-}
-
 
 void print_comma_then_int(int myint){
     printf(",%i",myint);
@@ -219,8 +128,9 @@ void send_int(int fd, int int_in){
     lsb = (uint8_t)int_in;
         
     outArray[0] = 5;//the i2c test case
-    outArray[1] = msb;
-    outArray[2] = lsb;
+    // bytes 1 and 2 are n_msb and n_lst
+    outArray[3] = msb;
+    outArray[4] = lsb;
     // Send data to arduino
     //t1 = micros();
     write(fd, outArray, out_bytes);
@@ -230,7 +140,7 @@ void send_int(int fd, int int_in){
 
 int read_int(int fd){
     read(fd, inArray, in_bytes);
-    int my_echo_int = 256*inArray[6] + inArray[7];
+    int my_echo_int = 256*inArray[0] + inArray[1];
     return(my_echo_int); 
 }
 
@@ -250,6 +160,7 @@ int main (int argc, char **argv)
 {
   printf("at top of main\n");
 
+   /*---------------------
    if (argc > 1){
 	servo_angle = atoi(argv[1]);
    	printf("servo_angle = %d\n", servo_angle);
@@ -258,26 +169,18 @@ int main (int argc, char **argv)
 	printf("defaulting to servo_angle = 0");
 	servo_angle = 0;
    }
+   -------------------------*/
 
 
   // Setup I2C communication
-    mega_fd = wiringPiI2CSetup(MEGA_ID);
-    if (mega_fd == -1) {
+    uno_fd = wiringPiI2CSetup(MEGA_ID);
+    if (uno_fd == -1) {
         std::cout << "Mega failed to init I2C communication.\n";
         return -1;
     }
     std::cout << "Mega I2C communication successfully setup.\n";
-    printf("mega_fd: %i\n", mega_fd);
-    G_cart.set_fd(mega_fd);
-
-    enc_fd = wiringPiI2CSetup(UNO_ID);
-    if (enc_fd == -1) {
-        std::cout << "Encoder Uno failed to init I2C communication.\n";
-        return -1;
-    }
-    std::cout << "Encoder Uno I2C communication successfully setup.\n";
-
-    printf("enc_fd: %i\n", enc_fd);   	
+    printf("uno_fd: %i\n", uno_fd);
+    //G_cart.set_fd(uno_fd);
 
     // i2c comm check
     int q;
@@ -287,9 +190,9 @@ int main (int argc, char **argv)
     printf("i2c comm chec:k\n");
 
     for (q=302; q< 500; q+=175){
-    	send_int(mega_fd, q);
-        delay(100);
-        echo_int = read_int(mega_fd);
+    	send_int(uno_fd, q);
+        delay(1);
+        echo_int = read_int(uno_fd);
         expected_resp = q*10+1;
 
         if (expected_resp == echo_int){
@@ -304,126 +207,126 @@ int main (int argc, char **argv)
 
     if (any_fail > 0){
 	printf("i2c comm test failed, exiting\n");
-	printf("you probably need to power cycle your Arduino Mega\n");
-    printf("or execute the command echo_performance.sh\n");
+	printf("you probably need to power cycle your Arduino\n");
+        printf("or execute the command echo_performance.sh\n");
 	return(-1);
     }
 
-    FILE * fp;
-
-    fp = fopen ("data.txt", "w");
-    //bdsyscsvlabels
-    //fprintf(fp, "%s %s %s %d", "We", "are", "in", 2012);
-
-    wiringPiSetup();
-    // what are the wiringPi pin #'s?  in what "mode"?
-    // - using the command `gpio readall` leads me to the following
-    //   conclusions on wiringPi pin #'s:
-    //   - 0 ==> BCM 17, physical 11
-    //   - 1 ==> BCM 18, physical 12
-    //   - 3 ==> BCM 22, physical 15
-    pinMode(isr_sw_pin, OUTPUT);
-    pinMode(loop_sw_pin, OUTPUT);
-    pinMode(3, OUTPUT);
-    printf("sending data\n");
-
-
-  //bdsyssetupcode
-
-
-  //menu
-  calibrated = check_cal();
-  printf("in menu, calibrated = %i\n", calibrated);
-
-  char mychar;
-  	
-  if (calibrated == 0){
-    printf("If the line sensor is not calibrated,\n you cannot use it (no line following).\n");
-    printf("do you want to calibrate the line sensor? (y/n)\n");
-
-    //printf("press any character to calibrate\n");
-
-    mychar = getchar();
-    printf("you pressed: %c\n", mychar);
-    if (mychar == 'y'){
-	printf("sending calibration command to Mega\n");
-        send_cal_command();
-	printf("done with menu and/or calibration\n");
-	calibrated = check_cal();
-        if (calibrated == 0){
-          printf("calibration failed, exiting");
-          return -1;
-        }
-	printf("enter any character to start the test\n");
-        mychar = getchar();
-    }
-  };
-  /*   // reset encoders and t0 at the start of a test */
-
-  signal(SIGALRM, alarmWakeup);   
-  ualarm(2000, 2000);//500 
-
-
-
-  //bdsysmenucode
-
-  N = (int)(stop_t*500);
-
-  printf("at top of for loop\n");
-
-  t0 = micros();
-
-  for (i=0;i<N;i++){
-     // main control loop for test
-     //
-     // Adapt this for a for loop where we wait until
-     // the flag has been set
-
-     // wait for timer ISR to set flag"
-     while (ISRHappened == 0){
-         delayMicroseconds(50);
-     }
-
-     // timing pin high
-     digitalWrite(loop_sw_pin, 1);
-     // clear flag
-     ISRHappened = 0;
-     cur_t = micros();
-     //Serial.println(cur_t);
-     t = cur_t-t0;
-     if (t < 0){
-       t += 65536;
-     }
-     t_ms = t/1000.0;
-     t_sec = t_ms/1000.0;
+//    FILE * fp;
+//
+//    fp = fopen ("data.txt", "w");
+//    //bdsyscsvlabels
+//    //fprintf(fp, "%s %s %s %d", "We", "are", "in", 2012);
+//
+//    wiringPiSetup();
+//    // what are the wiringPi pin #'s?  in what "mode"?
+//    // - using the command `gpio readall` leads me to the following
+//    //   conclusions on wiringPi pin #'s:
+//    //   - 0 ==> BCM 17, physical 11
+//    //   - 1 ==> BCM 18, physical 12
+//    //   - 3 ==> BCM 22, physical 15
+//    pinMode(isr_sw_pin, OUTPUT);
+//    pinMode(loop_sw_pin, OUTPUT);
+//    pinMode(3, OUTPUT);
+//    printf("sending data\n");
+//
+//
+//  //bdsyssetupcode
+//
+//
+//  //menu
+//  calibrated = check_cal();
+//  printf("in menu, calibrated = %i\n", calibrated);
+//
+//  char mychar;
+//  	
+//  if (calibrated == 0){
+//    printf("If the line sensor is not calibrated,\n you cannot use it (no line following).\n");
+//    printf("do you want to calibrate the line sensor? (y/n)\n");
+//
+//    //printf("press any character to calibrate\n");
+//
+//    mychar = getchar();
+//    printf("you pressed: %c\n", mychar);
+//    if (mychar == 'y'){
+//	printf("sending calibration command to Mega\n");
+//        send_cal_command();
+//	printf("done with menu and/or calibration\n");
+//	calibrated = check_cal();
+//        if (calibrated == 0){
+//          printf("calibration failed, exiting");
+//          return -1;
+//        }
+//	printf("enter any character to start the test\n");
+//        mychar = getchar();
+//    }
+//  };
+//  /*   // reset encoders and t0 at the start of a test */
+//
+//  signal(SIGALRM, alarmWakeup);   
+//  ualarm(2000, 2000);//500 
+//
+//
+//
+//  //bdsysmenucode
+//
+//  N = (int)(stop_t*500);
+//
+//  printf("at top of for loop\n");
+//
+//  t0 = micros();
+//
+//  for (i=0;i<N;i++){
+//     // main control loop for test
+//     //
+//     // Adapt this for a for loop where we wait until
+//     // the flag has been set
+//
+//     // wait for timer ISR to set flag"
+//     while (ISRHappened == 0){
+//         delayMicroseconds(50);
+//     }
+//
+//     // timing pin high
+//     digitalWrite(loop_sw_pin, 1);
+//     // clear flag
+//     ISRHappened = 0;
+//     cur_t = micros();
+//     //Serial.println(cur_t);
+//     t = cur_t-t0;
+//     if (t < 0){
+//       t += 65536;
+//     }
+//     t_ms = t/1000.0;
+//     t_sec = t_ms/1000.0;
+// 
+//     if (i == 5){
+//	// open servo:w
+//	send_byte_to_uno(enc_fd, servo_angle);
+//     }
+//
+//     //bdsysloopcode
+//     
+//     	
+//     //bdsysprintcode
+//         
+//     
+//     digitalWrite(loop_sw_pin, 0);
+//  }
+//
+//  tf = micros();
+//  total_dt = tf - t0;
+//  loop_time_ms = total_dt/1000.0;
+//  printf("loop time (ms) = %0.2f\n", loop_time_ms);
+//      
+//  
+//  G_cart.stop_motors();
+//  delay(100);
+//  G_cart.stop_motors();
  
-     if (i == 5){
-	// open servo:w
-	send_byte_to_uno(enc_fd, servo_angle);
-     }
-
-     //bdsysloopcode
-     
-     	
-     //bdsysprintcode
-         
-     
-     digitalWrite(loop_sw_pin, 0);
-  }
-
-  tf = micros();
-  total_dt = tf - t0;
-  loop_time_ms = total_dt/1000.0;
-  printf("loop time (ms) = %0.2f\n", loop_time_ms);
-      
-  
-  G_cart.stop_motors();
-  delay(100);
-  G_cart.stop_motors();
- 
-  close(mega_fd);
+  close(uno_fd);
   close(enc_fd);
-  fclose(fp);
+  //fclose(fp);
   return 0;
 }
 
