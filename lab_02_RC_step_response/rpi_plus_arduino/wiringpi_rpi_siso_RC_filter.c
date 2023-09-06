@@ -75,12 +75,6 @@ int loop_sw_pin = 1;
 //}
 //
 
-int reassemblebytes(uint8_t msb, uint8_t lsb){
-  int output;
-  output = (int)(msb << 8);
-  output += lsb;
-  return output;
-}
 
 // it feels like the file descriptors need to get assigned
 // when main runs; this means that these i2c functions need
