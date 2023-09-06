@@ -145,11 +145,6 @@ int read_int(int fd){
 }
 
 
-void send_byte_to_uno(int fd, uint8_t mybyte){
-    servoArray[0] = mybyte;
-    //outArray[1] = 51;
-    write(fd, servoArray, 1);
-}
 
 
 
@@ -175,10 +170,10 @@ int main (int argc, char **argv)
   // Setup I2C communication
     uno_fd = wiringPiI2CSetup(MEGA_ID);
     if (uno_fd == -1) {
-        std::cout << "Mega failed to init I2C communication.\n";
+        std::cout << "Arduino failed to init I2C communication.\n";
         return -1;
     }
-    std::cout << "Mega I2C communication successfully setup.\n";
+    std::cout << "Arduino I2C communication successfully setup.\n";
     printf("uno_fd: %i\n", uno_fd);
     //G_cart.set_fd(uno_fd);
 
@@ -189,14 +184,14 @@ int main (int argc, char **argv)
  
     printf("i2c comm chec:k\n");
 
-    for (q=302; q< 500; q+=175){
+    for (q=102; q< 500; q+=25){
     	send_int(uno_fd, q);
         delay(1);
         echo_int = read_int(uno_fd);
         expected_resp = q*10+1;
 
         if (expected_resp == echo_int){
-            printf("echo int passed, q = %i\n", q);
+            printf("echo int passed, q = %i, echo_int=%i\n", q, echo_int);
         }
         else{
             printf("problem with echo int; expected %i, recieved %i\n", expected_resp, echo_int);
@@ -325,7 +320,6 @@ int main (int argc, char **argv)
 //  G_cart.stop_motors();
  
   close(uno_fd);
-  close(enc_fd);
   //fclose(fp);
   return 0;
 }
