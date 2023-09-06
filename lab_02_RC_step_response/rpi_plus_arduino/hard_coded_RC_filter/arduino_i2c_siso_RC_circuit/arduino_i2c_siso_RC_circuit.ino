@@ -13,7 +13,7 @@ int state;
 int ISR_state;
 int position;
 
-bool print_data = true;
+bool print_data = false;
 
 bool sent_data = false;
 bool send_ser = false;
