@@ -145,11 +145,6 @@ int read_int(int fd){
 }
 
 
-void send_byte_to_uno(int fd, uint8_t mybyte){
-    servoArray[0] = mybyte;
-    //outArray[1] = 51;
-    write(fd, servoArray, 1);
-}
 
 
 //bdsysinitcode
