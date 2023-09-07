@@ -115,14 +115,14 @@ void setup()
   pinMode(receivePin, OUTPUT);
   pinMode(controlPin, OUTPUT);
   pinMode(isrPin, OUTPUT);  
-  //pinMode(ao_pin, OUTPUT);  
+  pinMode(ao_pin, OUTPUT);  
     
 
   digitalWrite(receivePin, LOW);
   digitalWrite(sendPin, LOW);
   digitalWrite(controlPin, LOW);
   digitalWrite(isrPin, LOW);  
-  //analogWrite(ao_pin, 0);
+  analogWrite(ao_pin, 0);
 
 
   for(int i=0;i<out_bytes;i++){
@@ -261,7 +261,7 @@ void loop()
 	  //n_i2c, v1, v2, position, dt_micro
       	Serial.print(n_i2c);
       	print_comma_then_int(cmd);
-      	print_comma_then_int(dt_micro);
+      	print_comma_then_int(sensor_reading);
       	mynewline();
       }
     }
