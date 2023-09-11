@@ -6,7 +6,7 @@ int test_case;
 
 
 // eventual RC filter pins
-int ao_pin = 3;
+int ao_pin = 6;
 int ai_pin = A0;
 
 int state;
