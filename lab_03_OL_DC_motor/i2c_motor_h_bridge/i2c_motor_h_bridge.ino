@@ -103,6 +103,12 @@ int tempbyte;
 int inByte;
 int ISR_Happened;
 
+void zero_outArray(){
+  for(int i=0;i<out_bytes;i++){
+    outArray[i] = i;
+  }
+}
+
 void setup()
 {
   Wire.begin(0x07);                // join i2c bus with address 7
@@ -133,10 +139,7 @@ void setup()
   digitalWrite(controlPin, LOW);
   digitalWrite(isrPin, LOW);  
 
-
-  for(int i=0;i<out_bytes;i++){
-    outArray[i] = i;
-  }
+  zero_outArray();
 }
 
 //unsigned char getsecondbyte(int input){
@@ -257,7 +260,8 @@ void loop()
       // - what needs to happen here?
       nISR = 0;
       n_loop = 0;
-      enc.output = 0;
+      enc.encoder_count = 0;
+      zero_outArray();
       // - anything else?
     }
     else if (inArray[0] == 2){
