@@ -126,14 +126,12 @@ void setup()
   pinMode(receivePin, OUTPUT);
   pinMode(controlPin, OUTPUT);
   pinMode(isrPin, OUTPUT);  
-  pinMode(ao_pin, OUTPUT);  
     
 
   digitalWrite(receivePin, LOW);
   digitalWrite(sendPin, LOW);
   digitalWrite(controlPin, LOW);
   digitalWrite(isrPin, LOW);  
-  analogWrite(ao_pin, 0);
 
 
   for(int i=0;i<out_bytes;i++){
