@@ -42,7 +42,7 @@ uint8_t inArray[in_bytes];
 uint8_t outArray[out_bytes];
 
 uint8_t ilsb, imsb;
-float stop_t=1;
+float stop_t=3;
 uint8_t lsb, msb;
 
 float get_float(const char* var_name){
