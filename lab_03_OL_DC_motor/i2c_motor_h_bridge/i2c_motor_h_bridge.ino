@@ -50,9 +50,9 @@ float t_ms, t_sec, prev_t, dt;
 bool new_data;
 
 int squarewave_pin = 12;
-#define sendPin 11
-#define receivePin 10
-#define controlPin 9
+#define sendPin A1
+#define receivePin A2
+#define controlPin A3
 #define isrPin 8
 
 byte mypause;
