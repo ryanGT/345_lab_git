@@ -139,11 +139,11 @@ void setup()
   }
 }
 
-unsigned char getsecondbyte(int input){
-    unsigned char output;
-    output = (unsigned char)(input >> 8);
-    return output;
-}
+//unsigned char getsecondbyte(int input){
+//    unsigned char output;
+//    output = (unsigned char)(input >> 8);
+//    return output;
+//}
 
 
 void sendEvent() {
