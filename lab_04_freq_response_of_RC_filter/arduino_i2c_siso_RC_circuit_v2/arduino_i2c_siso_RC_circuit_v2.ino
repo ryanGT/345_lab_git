@@ -116,7 +116,7 @@ void setup()
   //bdsyswelcomecode
   Serial.println("Lab 4 - Uno RC Filter i2c code");
   Serial.println("i2c addr = 7");
-  Serial.println("version 1.0.0");
+  Serial.println("version 2.0.0");
 
   pinMode(squarewave_pin, OUTPUT);
 
@@ -194,7 +194,7 @@ void pinISR()
     n_i2c = 256*n_msb + n_lsb;
     cmd_msb = inArray[3];
     cmd_lsb = inArray[4];
-    cmd = reassemblebytes(cmd_msb,cmd_lsb)+128;
+    cmd = reassemblebytes(cmd_msb,cmd_lsb);
     analogWrite(ao_pin, cmd);
     // load up outArray to acknowledge what we have received
     // - is it better to have the Arduino respond by echoing the 
