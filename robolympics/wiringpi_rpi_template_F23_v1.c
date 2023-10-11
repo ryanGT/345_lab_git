@@ -365,6 +365,8 @@ int main (int argc, char **argv)
 
   printf("at top of for loop\n");
 
+  //bdsysstarttestcode
+
   t0 = micros();
 
   for (i=0;i<N;i++){
@@ -410,7 +412,8 @@ int main (int argc, char **argv)
   loop_time_ms = total_dt/1000.0;
   printf("loop time (ms) = %0.2f\n", loop_time_ms);
       
-  
+ //bdsysendtestcode  
+ 
   G_cart.stop_motors();
   delay(100);
   G_cart.stop_motors();
