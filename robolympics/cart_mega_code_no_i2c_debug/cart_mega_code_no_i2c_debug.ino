@@ -58,11 +58,6 @@ uint16_t sensorValues[SensorCount];
 
 byte mypause;
 
-#define in_bytes 7
-#define out_bytes 8
-byte inArray[in_bytes];
-byte outArray[out_bytes];
-
 
 int v1, v2, vnom, mydir;
 byte v1_msb, v1_lsb, v2_msb, v2_lsb, pos_msb, pos_lsb, n_msb, n_lsb;
@@ -151,7 +146,6 @@ void calibrate_line_sensor(){
   Serial.println();
   Serial.println();
   calibrated = 1;
-  outArray[0] = calibrated;
   delay(500);
 }
 
@@ -172,10 +166,6 @@ void menu(){
 
 void setup()
 {
-  Wire.begin(0x07);                // join i2c bus with address 9
-  Wire.onRequest(sendEvent); // register event
-  Wire.onReceive(receiveEvent);
-
   Serial.begin(115200);
 
   //bdsyswelcomecode
@@ -184,7 +174,8 @@ void setup()
   Serial.println("- emitter pin 27");
   Serial.println("- skip line sensor reading if not calibrated");
   Serial.println("    - hard code position to 10,000 if not calibrated");
-
+  Serial.println("");
+  Serial.println("debug");
   
   pinMode(squarewave_pin, OUTPUT);
 
@@ -223,11 +214,6 @@ void setup()
 
   calibrated = 0;
 
-  for(int i=0;i<out_bytes;i++){
-    outArray[i] = i;
-  }
-
-  outArray[0] = calibrated;
   /* delay(500); */
 
   /* Serial.println("press c to begin calibration (s to skip)"); */
@@ -264,77 +250,6 @@ unsigned char getsecondbyte(int input){
 }
 
 
-void sendEvent() {
-  digitalWrite(sendPin, HIGH);  
-  Wire.write(outArray,sizeof(outArray));
-  //if (ISR_Happened == 1){
-  //    digitalWrite(handshake_pin, HIGH);
-  //}
-  mypause = 0;
-  sent_data = true;
-  digitalWrite(sendPin, LOW);    
-}
-
-void receiveEvent(int numBytes){
-  digitalWrite(receivePin, HIGH);  
-  for(int i=0;i<numBytes;i++){
-    inArray[i] = Wire.read();
-  }
-  new_data = true;
-  //small delays here shouldn't be terrible because the data is already read
-  // - measuring the time between receive events to detect glitches on the
-  //   micropython side
-  //     - as long as the Arduino receives data before the next time step,
-  //       everything is assumed to be working correctly
-  prev_t_micros = t;
-  t = micros();
-  dt_micro = t-prev_t_micros;
-  digitalWrite(receivePin, LOW);
-}
-
-void pinISR()
-{     
-  digitalWrite(isrPin, HIGH);
-  ISR_Happened = 1;
-    
-  if (inArray[0] == 3){
-    // - process the data if it is there
-    // - probably need to send [3,0,0,0,0] to keep the motors stopped, just to be safe
-    digitalWrite(controlPin, HIGH);
-    n_msb = inArray[1];
-    n_lsb = inArray[2];
-    n_i2c = 256*n_msb + n_lsb;
-    v1_msb = inArray[3];
-    v1_lsb = inArray[4];
-    v1 = reassemblebytes(v1_msb,v1_lsb);
-    v2_msb = inArray[5];
-    v2_lsb = inArray[6];
-    v2 = reassemblebytes(v2_msb,v2_lsb);
-    vnom = v1 + v2;//reall 2*vnom, but we just need the sign
-    if (vnom >= 0){
-	mydir = 1;
-    }
-    else{
-	mydir = -1;
-    }
-   
-    // load up outArray to acknowledge what we have received
-    outArray[4] = n_msb;
-    outArray[5] = n_lsb;
-    dt_micro_lsb = (byte)dt_micro;
-    dt_micro_msb = getsecondbyte(dt_micro);
-    outArray[6] = dt_micro_msb;
-    outArray[7] = dt_micro_lsb;
-    digitalWrite(controlPin, LOW);
-  }
-  set_speeds(v1, v2);
-  //analogWrite(pwmA, v1);
-  //v_out = v1*v1;
-  //accel = analogRead(analogPin);
-  digitalWrite(isrPin, LOW);
-}
-
-
 void loop()
 {
   /* if (ISR_Happened > 0 ){ */
@@ -346,82 +261,6 @@ void loop()
   /*   Serial.print(v2); */
   /*   mynewline(); */
   /* } */
-  if ( sent_data ){
-    sent_data = false;
-    //Serial.println("I sent data");
-  }
-  if ( new_data ){
-    /* Serial.print("new data, inArray = "); */
-    /* for (int k=0; k<7; k++){ */
-    /*   Serial.print(inArray[k]); */
-    /*   if (k<6){ */
-    /* 	Serial.print(","); */
-    /*   } */
-    /*   else{ */
-    /* 	Serial.print('\n'); */
-    /*   } */
-    /* } */
-
-    new_data = false;
-    //digitalWrite(i2cprocessPin, HIGH);  
-
-    //Serial.println("new data");
-    if (inArray[0] == 1){
-      // start new test
-      // - what needs to happen here?
-      nISR = 0;
-      n_loop = 0;
-      // - anything else?
-    }
-    else if (inArray[0] == 2){
-      // end test
-      stop_motors();
-      v1 = 0;
-      v2 = 0;
-    }
-
-    else if (inArray[0] == 3){
-      pinISR();
-      if (print_data){
-	  //n_i2c, v1, v2, position, dt_micro
-      	Serial.print(n_i2c);
-      	print_comma_then_int(v1);
-      	print_comma_then_int(v2);
-      	print_comma_then_int(position);
-      	print_comma_then_int(dt_micro);
-      	mynewline();
-      }
-    }
-    else if (inArray[0] == 4){
-      Serial.println("received cal command");
-      calibrate_line_sensor();
-    }
-    else if (inArray[0] == 5){
-        // i2c communication test
-        // - bytes 0-3 are loaded else where
-        outArray[4] = inArray[1];
-        outArray[5] = inArray[2];
-        i_received = 256*inArray[1] + inArray[2];
-        myresponse = 10*i_received + 1;
-        myr_lsb = (byte)myresponse;
-        myr_msb = getsecondbyte(myresponse);
-        outArray[6] = myr_msb;
-        outArray[7] = myr_lsb;
-        //Serial.print("i = ");
-    
-    }
-    /* else if (inArray[0] == 3){ */
-    /*   // main control case */
-    /*   digitalWrite(controlPin, HIGH);   */
-    /*   v1_msb = inArray[1]; */
-    /*   v1_lsb = inArray[2]; */
-    /*   v1 = reassemblebytes(v1_msb,v1_lsb); */
-    /*   v2_msb = inArray[3]; */
-    /*   v2_lsb = inArray[4]; */
-    /*   v2 = reassemblebytes(v2_msb,v2_lsb); */
-    /*   digitalWrite(controlPin, LOW);   */
-    /* } */
-  }
   if (calibrated>0){
     mydir = 1;
     if (mydir > 0){
@@ -445,11 +284,5 @@ void loop()
   }
   n_loop++;
   // load data into array to send to upy
-  outArray[0] = calibrated;
-  outArray[1] = n_loop;
-  pos_lsb = (byte)position;
-  pos_msb = getsecondbyte(position);
-  outArray[2] = pos_msb;
-  outArray[3] = pos_lsb;
 }
   
