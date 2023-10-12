@@ -1,6 +1,5 @@
 #include <kraussserial.h>
 #include <math.h>
-#include <Wire.h>
 #include <DualMAX14870MotorShield.h>
 #include <QTRSensors.h>
 
@@ -167,7 +166,7 @@ void setup()
   Serial.println("- skip line sensor reading if not calibrated");
   Serial.println("    - hard code position to 10,000 if not calibrated");
   Serial.println("");
-  Serial.println("debug");
+  Serial.println("debug - bare");
   
   //!// encoder pin on interrupt 0 (pin 2)
 
