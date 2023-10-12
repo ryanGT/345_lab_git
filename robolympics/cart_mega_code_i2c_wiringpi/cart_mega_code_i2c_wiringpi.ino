@@ -35,6 +35,8 @@ int i_received;
 int myresponse;
 byte myr_lsb, myr_msb;
 
+bool debug=true;
+
 
 unsigned long t0;
 unsigned long prev_t_micros;
@@ -51,7 +53,7 @@ bool new_data;
 #define isrPin A11
 
 
-const uint8_t SensorCount = 7;//<---
+#define SensorCount 7
 uint16_t sensorValues[SensorCount];
 
 byte mypause;
@@ -62,7 +64,7 @@ byte inArray[in_bytes];
 byte outArray[out_bytes];
 
 
-int v1, v2;
+int v1, v2, vnom, mydir;
 byte v1_msb, v1_lsb, v2_msb, v2_lsb, pos_msb, pos_lsb, n_msb, n_lsb;
 
 int dt_micro;
@@ -80,17 +82,43 @@ int ISR_Happened;
 
 DualMAX14870MotorShield motors;
 
-QTRSensors qtr;
+QTRSensors qtrF;
+//QTRSensors qtrR;
 
 void set_speeds(int v_right, int v_left){
   motors.setM1Speed(v_right);
   motors.setM2Speed(v_left);
 }
 
+void print_sensor_values(){
+    for (uint8_t q=0; q< SensorCount; q++){
+        if ( q > 0){
+            Serial.print(" ");
+        }
+        Serial.print(sensorValues[q]);
+    }
+}
 
 void stop_motors(){
   motors.setM1Speed(0);
   motors.setM2Speed(0);
+}
+
+void print_cal_res(QTRSensors qtr){
+  for (uint8_t i = 0; i < SensorCount; i++)
+  {
+    Serial.print(qtr.calibrationOn.minimum[i]);
+    Serial.print(' ');
+  }
+  Serial.println();
+
+  for (uint8_t i = 0; i < SensorCount; i++)
+  {
+    Serial.print(qtr.calibrationOn.maximum[i]);
+    Serial.print(' ');
+  }
+ 
+
 }
 
 
@@ -108,25 +136,18 @@ void calibrate_line_sensor(){
       sign *= -1;
       j = 0;
     }
-    qtr.calibrate();
+    qtrF.calibrate();
+    //qtrR.calibrate();
     Serial.println(i);
   }
     set_speeds(0,0);
 
   Serial.println("calibration results:");
   // print the calibration minimum values measured when emitters were on
-  for (uint8_t i = 0; i < SensorCount; i++)
-  {
-    Serial.print(qtr.calibrationOn.minimum[i]);
-    Serial.print(' ');
-  }
-  Serial.println();
-
-  for (uint8_t i = 0; i < SensorCount; i++)
-  {
-    Serial.print(qtr.calibrationOn.maximum[i]);
-    Serial.print(' ');
-  }
+  Serial.println("Front cal:");
+  print_cal_res(qtrF);
+  //Serial.println("Rear cal:");
+  //print_cal_res(qtrR);
   Serial.println();
   Serial.println();
   calibrated = 1;
@@ -189,10 +210,16 @@ void setup()
 
   //attachInterrupt(digitalPinToInterrupt(18), pinISR, CHANGE);
 
-  qtr.setTypeRC();
-  qtr.setSensorPins((const uint8_t[]){29,31,33,35,37,39,41}, SensorCount);
-  //qtr.setSensorPins((const uint8_t[]){27,29,31,33,35,37,39}, SensorCount);
-  qtr.setEmitterPin(27);
+  qtrF.setTypeRC();
+  //////qtr.setSensorPins((const uint8_t[]){27,29,31,33,35,37,39}, SensorCount);
+  qtrF.setSensorPins((const uint8_t[]){32,34,36,38,40,42,44}, SensorCount);
+  //qtrF.setSensorPins((const uint8_t[]){44,42,40,38,36,34,32}, SensorCount);
+  qtrF.setEmitterPin(46);
+ 
+  //qtrR.setTypeRC();
+  //qtrR.setSensorPins((const uint8_t[]){45,43,41,39,37,35,33}, SensorCount);
+  ////qtr.setSensorPins((const uint8_t[]){27,29,31,33,35,37,39}, SensorCount);
+  //qtrR.setEmitterPin(31);
 
   calibrated = 0;
 
@@ -278,6 +305,14 @@ void pinISR()
     v2_msb = inArray[5];
     v2_lsb = inArray[6];
     v2 = reassemblebytes(v2_msb,v2_lsb);
+    vnom = v1 + v2;//reall 2*vnom, but we just need the sign
+    if (vnom >= 0){
+	mydir = 1;
+    }
+    else{
+	mydir = -1;
+    }
+   
     // load up outArray to acknowledge what we have received
     outArray[4] = n_msb;
     outArray[5] = n_lsb;
@@ -383,7 +418,22 @@ void loop()
     /* } */
   }
   if (calibrated>0){
-  	position = qtr.readLineBlack(sensorValues);//<--- this will block the reading of new data
+    mydir = 1;
+    if (mydir > 0){
+  	position = qtrF.readLineBlack(sensorValues);//<--- this will block the reading of new data
+    }
+    else{
+        position = 7;
+        //position = qtrR.readLineBlack(sensorValues);//<--- this will block the reading of new data
+    }
+    if (debug){
+	Serial.print("mydir: ");
+        Serial.println(mydir);
+	print_sensor_values();
+	Serial.print(" : ");
+        Serial.println(position);
+	delay(500);
+    }
   }
   else{
 	position = 10000;
