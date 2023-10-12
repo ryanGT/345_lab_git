@@ -83,7 +83,7 @@ int ISR_Happened;
 DualMAX14870MotorShield motors;
 
 QTRSensors qtrF;
-//QTRSensors qtrR;
+QTRSensors qtrR;
 
 void set_speeds(int v_right, int v_left){
   motors.setM1Speed(v_right);
@@ -104,7 +104,7 @@ void stop_motors(){
   motors.setM2Speed(0);
 }
 
-void print_cal_res(QTRSensors qtr){
+void print_cal_res(QTRSensors &qtr){
   for (uint8_t i = 0; i < SensorCount; i++)
   {
     Serial.print(qtr.calibrationOn.minimum[i]);
@@ -137,7 +137,7 @@ void calibrate_line_sensor(){
       j = 0;
     }
     qtrF.calibrate();
-    //qtrR.calibrate();
+    qtrR.calibrate();
     Serial.println(i);
   }
     set_speeds(0,0);
@@ -146,8 +146,8 @@ void calibrate_line_sensor(){
   // print the calibration minimum values measured when emitters were on
   Serial.println("Front cal:");
   print_cal_res(qtrF);
-  //Serial.println("Rear cal:");
-  //print_cal_res(qtrR);
+  Serial.println("Rear cal:");
+  print_cal_res(qtrR);
   Serial.println();
   Serial.println();
   calibrated = 1;
@@ -184,6 +184,9 @@ void setup()
   Serial.println("- emitter pin 27");
   Serial.println("- skip line sensor reading if not calibrated");
   Serial.println("    - hard code position to 10,000 if not calibrated");
+ 
+  Serial.println(" ");
+  Serial.println("i2c cart version");
 
 
   pinMode(squarewave_pin, OUTPUT);
@@ -216,10 +219,9 @@ void setup()
   //qtrF.setSensorPins((const uint8_t[]){44,42,40,38,36,34,32}, SensorCount);
   qtrF.setEmitterPin(46);
  
-  //qtrR.setTypeRC();
-  //qtrR.setSensorPins((const uint8_t[]){45,43,41,39,37,35,33}, SensorCount);
-  ////qtr.setSensorPins((const uint8_t[]){27,29,31,33,35,37,39}, SensorCount);
-  //qtrR.setEmitterPin(31);
+  qtrR.setTypeRC();
+  qtrR.setSensorPins((const uint8_t[]){45,43,41,39,37,35,33}, SensorCount);
+  qtrR.setEmitterPin(31);
 
   calibrated = 0;
 
@@ -418,13 +420,13 @@ void loop()
     /* } */
   }
   if (calibrated>0){
-    mydir = 1;
+    mydir = -1;
     if (mydir > 0){
   	position = qtrF.readLineBlack(sensorValues);//<--- this will block the reading of new data
     }
     else{
-        position = 7;
-        //position = qtrR.readLineBlack(sensorValues);//<--- this will block the reading of new data
+        //position = 7;
+        position = qtrR.readLineBlack(sensorValues);//<--- this will block the reading of new data
     }
     if (debug){
 	Serial.print("mydir: ");
