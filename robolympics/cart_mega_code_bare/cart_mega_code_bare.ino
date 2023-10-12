@@ -1,5 +1,6 @@
 #include <math.h>
 #include <QTRSensors.h>
+#include <kraussserial.h>
 
 
 volatile int v_left, v_right;
@@ -67,10 +68,6 @@ int ISR_Happened;
 QTRSensors qtrF;
 //QTRSensors qtrR;
 
-void set_speeds(int v_right, int v_left){
-  motors.setM1Speed(v_right);
-  motors.setM2Speed(v_left);
-}
 
 void print_sensor_values(){
     for (uint8_t q=0; q< SensorCount; q++){
@@ -117,7 +114,6 @@ void calibrate_line_sensor(){
     //qtrR.calibrate();
     Serial.println(i);
   }
-    set_speeds(0,0);
 
   Serial.println("calibration results:");
   // print the calibration minimum values measured when emitters were on
