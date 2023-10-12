@@ -1,6 +1,4 @@
-#include <kraussserial.h>
 #include <math.h>
-#include <DualMAX14870MotorShield.h>
 #include <QTRSensors.h>
 
 
@@ -66,8 +64,6 @@ int tempbyte;
 int inByte;
 int ISR_Happened;
 
-DualMAX14870MotorShield motors;
-
 QTRSensors qtrF;
 //QTRSensors qtrR;
 
@@ -83,11 +79,6 @@ void print_sensor_values(){
         }
         Serial.print(sensorValues[q]);
     }
-}
-
-void stop_motors(){
-  motors.setM1Speed(0);
-  motors.setM2Speed(0);
 }
 
 void print_cal_res(QTRSensors qtr){
@@ -173,9 +164,6 @@ void setup()
   //Serial.print("pendulum/cart v. 1.1.0 RT Serial");
   //Serial.print("\n");
 
-  motors.enableDrivers();
-  motors.flipM1(true);
-
   //attachInterrupt(digitalPinToInterrupt(18), pinISR, CHANGE);
 
   qtrF.setTypeRC();
@@ -219,13 +207,6 @@ void setup()
   calibrate_line_sensor();
 
 }
-
-unsigned char getsecondbyte(int input){
-    unsigned char output;
-    output = (unsigned char)(input >> 8);
-    return output;
-}
-
 
 void loop()
 {
