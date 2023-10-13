@@ -420,7 +420,6 @@ void loop()
     /* } */
   }
   if (calibrated>0){
-    mydir = -1;
     if (mydir > 0){
   	position = qtrF.readLineBlack(sensorValues);//<--- this will block the reading of new data
     }
