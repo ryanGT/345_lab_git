@@ -1,22 +1,26 @@
+#include <kraussserial.h>
 #include <QTRSensors.h>
 
 uint16_t positionF, positionR;
 
 const uint8_t SensorCount = 7;
 
-uint16_t sensorValues[SensorCount];
+uint16_t sensorValuesF[SensorCount];
+uint16_t sensorValuesR[SensorCount];
 
 QTRSensors qtrF;
 QTRSensors qtrR;
 
 int calibrated;
+char mychar;
 
-void print_sensor_values(){
+
+void print_sensor_values(uint16_t *myarray){
     for (uint8_t q=0; q< SensorCount; q++){
         if ( q > 0){
             Serial.print(" ");
         }
-        Serial.print(sensorValues[q]);
+        Serial.print(myarray[q]);
     }
 }
 
@@ -90,14 +94,10 @@ void setup()
   Serial.begin(115200);
 
   //bdsyswelcomecode
-  Serial.println("Mega i2c code for RPI WiringPi C");
-  Serial.println("version 1.0.1");
-  Serial.println("- emitter pin 27");
-  Serial.println("- skip line sensor reading if not calibrated");
-  Serial.println("    - hard code position to 10,000 if not calibrated");
-  Serial.println("");
-  Serial.println("debug - bare");
   
+  Serial.println("dual line sensor verification");
+  Serial.println("- Arduino Mega only (no RPi)");
+  Serial.println("v 1.0.0");
   //!// encoder pin on interrupt 0 (pin 2)
 
   //Serial.print("pendulum/cart v. 1.1.0 RT Serial");
@@ -142,10 +142,16 @@ void setup()
   // need to switch to Timer3 for Arduino Mega
 
   Serial.println("enter any character to start calibration");
-  delay(1000);
+
+  mychar = get_char();
   calibrate_line_sensor();
 
+  Serial.println("enter any character to continue");
+
+  mychar = get_char();
 }
+
+
 
 void loop()
 {
@@ -159,19 +165,19 @@ void loop()
   /*   mynewline(); */
   /* } */
   if (calibrated>0){
-      positionF = qtrF.readLineBlack(sensorValues);//<--- this will block the reading of new data
+      positionF = qtrF.readLineBlack(sensorValuesF);//<--- this will block the reading of new data
       Serial.print("F: ");
-      print_sensor_values();
+      print_sensor_values(sensorValuesF);
       Serial.print(" - ");
       Serial.println(positionF);
 
-      positionR = qtrR.readLineBlack(sensorValues);//<--- this will block the reading of new data
+      positionR = qtrR.readLineBlack(sensorValuesR);//<--- this will block the reading of new data
       Serial.print("R: ");
-      print_sensor_values();
+      print_sensor_values(sensorValuesR);
       Serial.print(" - ");
       Serial.println(positionR);
        	
-     delay(500);
+     delay(750);
   }
   // load data into array to send to upy
 }

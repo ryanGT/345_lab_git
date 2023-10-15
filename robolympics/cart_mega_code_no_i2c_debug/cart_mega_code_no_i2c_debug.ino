@@ -35,7 +35,7 @@ int i_received;
 int myresponse;
 byte myr_lsb, myr_msb;
 
-bool debug=true;
+bool debug=false;
 
 
 unsigned long t0;
