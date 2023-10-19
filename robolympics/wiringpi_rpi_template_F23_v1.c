@@ -186,7 +186,7 @@ int send_cal_command(){
   printf("sending cal command\n");
   G_cart.send_cal_cmd();
   delay(2000);
-  for (int k=0; k<20; k++){
+  for (int k=0; k<50; k++){
     delay(500);
     calibrated = check_cal();
     printf("k = %i, calibrated = %i\n", k, calibrated);
@@ -297,9 +297,9 @@ int main (int argc, char **argv)
      }
 
     if (any_fail > 0){
-	printf("i2c comm test failed, exiting\n");
-	printf("you probably need to power cycle your Arduino Mega\n");
-    printf("or execute the command echo_performance.sh\n");
+        printf("i2c comm test failed, exiting\n");
+        printf("you probably need to power cycle your Arduino Mega\n");
+        printf("or execute the command echo_performance.sh\n");
 	return(-1);
     }
 
