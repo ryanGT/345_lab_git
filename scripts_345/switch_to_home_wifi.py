@@ -44,17 +44,28 @@ network_folder = "/etc/network"
 interfaces = "interfaces"
 backup_path = os.path.join(network_folder,backup_name)
 
+def sudo_copy(src, dst):
+    cmd = "sudo cp %s %s" % (src,dst)
+    os.system(cmd)
+
+
 if not os.path.exists(backup_path) and (ip_end in valid_list):
     print("your ip address is valid, backing up your interfaces file")
     src = os.path.join(network_folder, interfaces)
     dst = os.path.join(network_folder, backup_name)
     #shutil.copyfile(src,dst)
-    cmd = "sudo cp %s %s" % (src,dst)
-    os.system(cmd)
+    sudo_copy(src, dst)
 elif os.path.exists(backup_path):
     print("static intefaces file already backuped")
 elif ip_end not in valid_list:
     print("could not find valid static ip, exiting")
     print("please see Dr. Krauss")
     exit(1)
+
+scripts_folder = "~/345_lab_git/scripts_345"
+dhcp_name = "dhcp_interfaces_blank"
+src = os.path.expanduser(os.path.join(scripts_folder, dhcp_name))
+dst = os.path.join(network_folder, interfaces)
+print(" %s --> %s" % (src, dst))
+sudo_copy(src, dst)
 
