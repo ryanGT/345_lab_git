@@ -55,5 +55,6 @@ elif os.path.exists(backup_path):
     print("static intefaces file already backuped")
 elif ip_end not in valid_list:
     print("could not find valid static ip, exiting")
+    print("please see Dr. Krauss")
     exit(1)
 
