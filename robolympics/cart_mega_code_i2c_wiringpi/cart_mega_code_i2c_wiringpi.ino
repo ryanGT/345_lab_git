@@ -152,7 +152,7 @@ void calibrate_line_sensor(){
   Serial.println();
   calibrated = 1;
   outArray[0] = calibrated;
-  delay(500);
+  //delay(500);
 }
 
 
