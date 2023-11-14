@@ -14,7 +14,7 @@ int test_case;
 int state;
 int ISR_state;
 int squarewave_pin = A7;
-int position;
+uint16_t position;
 
 bool print_data = false;
 
@@ -152,7 +152,7 @@ void calibrate_line_sensor(){
   Serial.println();
   calibrated = 1;
   outArray[0] = calibrated;
-  delay(500);
+  //delay(500);
 }
 
 
