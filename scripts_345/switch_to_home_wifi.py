@@ -37,7 +37,7 @@ ip_str = rest.strip()
 ip_parts = ip_str.split(".")
 ip_end = int(ip_parts[-1])
 
-valid_list = [233]
+valid_list = [233, 234, 247]
 
 backup_name = "interfaces_static_backup_F23"
 network_folder = "/etc/network"
