@@ -103,7 +103,7 @@ print("encoder max: %s" % enc_max)
 print("encoder min: %s" % enc_min)
 
 
-plot_enc_data(data,time_col=1,enc_col=pend_col,vib_on_col=vib_col)
+plot_enc_data(data,time_col=1,enc_col=pend_col)
 
 
 plt.show()
