@@ -1,0 +1,100 @@
+\documentclass[landscape,letterpaper,11pt]{article}
+\usepackage[utf8x]{inputenc} % utf8 encoding
+\usepackage[T1]{fontenc} % use T1 fonts
+\usepackage{amsmath} % nice math symbols
+\usepackage{bm} % bold math
+\usepackage{color} % change text color        
+
+\usepackage{tikz}
+\usetikzlibrary{calc,patterns,decorations.pathmorphing,decorations.markings}
+%%%<
+\usepackage{circuitikz}
+\usepackage{verbatim}
+\usepackage[active,tightpage]{preview}
+%\PreviewEnvironment{tikzpicture}
+\PreviewEnvironment{circuitikz}
+\setlength\PreviewBorder{5pt}%
+%%%>
+
+\tikzstyle{resistor}=[thick,decorate,
+                      decoration={zigzag,pre length=1cm,post length=1cm,
+                                  segment length=8, amplitude=0.2cm}]
+\tikzstyle{wire}=[thick]
+\tikzstyle{emptynode}=[minimum width=0pt, inner sep=0pt, minimum height=0pt, draw=none]
+
+\def \labelshift {0.5cm}
+\def \signshift {0.3cm}
+\def \reslen {2cm}
+\def \twoR {3.5cm}
+\def \capw {0.4cm}
+\def \anngap {0.5cm}
+\def \annleader {0.5cm}
+\begin{document}
+\begin{circuitikz} [every node/.style={font=\large}, node distance=1cm]% draw,outer sep=0pt,thick}]
+%\begin{tikzpicture}[every node/.style={font=\large}, node distance=1cm]% draw,outer sep=0pt,thick}]
+%   \node [shape=circle,draw, fill] (ball) {};
+%   \node [right of=ball, node distance=1cm, yshift=0.5cm] (v0) {$v_0$};
+%   \draw[->] (ball) -- (v0);
+
+%-----------------------------
+% Voltage source
+\node (vin) at (0,0) {$v_{in}$};
+
+\node (vinU) [emptynode, above of=vin, node distance=1.1cm] {};
+\node (vinB) [emptynode, below of=vin, node distance=1.1cm] {};
+\draw[thick, fill=black] (vinU) circle (3pt);
+\draw[thick, fill=black] (vinB) circle (3pt);
+
+%-----------------------------
+
+\coordinate[right of=vinU, node distance=0.5cm] (A);
+\coordinate[right of=A, node distance=\twoR] (B);
+
+\coordinate[below of=B] (C1);
+\coordinate[left of=C1, node distance=\capw] (C1L);
+\coordinate[right of=C1, node distance=\capw] (C1R);
+
+\draw [wire] (C1L) -- (C1R);
+\draw [wire] (B) -- (C1);
+
+\coordinate[below of=C1, node distance=0.2cm] (C2);
+\coordinate[left of=C2, node distance=\capw] (C2L);
+\coordinate[right of=C2, node distance=\capw] (C2R);
+
+\draw [wire] (C2L) -- (C2R);
+
+\coordinate[below of=C2] (BR);%bottom right
+\draw [wire] (C2) -- (BR) -- (vinB);
+
+\node [emptynode, left of=C2L, node distance=0.3cm, yshift=0.07cm] 
+         (Clabel) {$C$};
+%\coordinate[below of=C, node distance=\twoR] (F);
+%\coordinate[below of=D, node distance=\twoR] (G);
+
+\coordinate [right of=B, node distance=\anngap] (VOT1);
+\coordinate [right of=VOT1, node distance=\annleader] (VOT2);
+\coordinate [right of=VOT2, node distance=\annleader] (VOT3);
+\coordinate [below of=VOT2, node distance=0.8cm] (VOT4);
+\coordinate [right of=BR, node distance=\anngap] (VOB1);
+\coordinate [right of=VOB1, node distance=\annleader] (VOB2);
+\coordinate [right of=VOB2, node distance=\annleader] (VOB3);
+\coordinate [above of=VOB2, node distance=0.8cm] (VOB4);
+
+\draw [wire] (VOT1) -- (VOT3);
+\draw [wire] (VOB1) -- (VOB3);
+\draw [-latex] (VOT4) -- (VOT2);
+\draw [-latex] (VOB4) -- (VOB2);
+
+\node [emptynode, below of=VOT4, node distance=0.3cm] (vout) {$v_{out}$};
+
+\draw [wire] (vinU) -- (A);
+\draw [resistor] (A) -- (B)
+    node (ronelabel) [pos=0.5, draw=none, yshift=\labelshift] {$R$};
+
+\coordinate[below of=BR, node distance=0.4cm] (gnd);
+\draw [wire] (BR) -- (gnd) node[ground,thick]{}; 
+
+
+%\end{tikzpicture}
+\end{circuitikz}
+\end{document}
