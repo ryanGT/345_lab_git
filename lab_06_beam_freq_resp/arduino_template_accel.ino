@@ -125,7 +125,7 @@ float t_ms, t_sec, prev_t, dt;
 float stop_t = 3.0;
 
 void setup(){
-   Serial.begin(115200);
+   Serial.begin(230400);
    //bdsyswelcomecode
    
    Serial.println("using rtblockdiagram library");
@@ -204,6 +204,7 @@ void menu(){
   ISR_Happened = 0;// clear flag and wait for next time step
   Serial.print("t0 =");
   Serial.println(t0);
+  //bdsyscsvlabels
 }
 
 
