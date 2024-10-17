@@ -11,3 +11,4 @@ python3-wxgtk4.0
 python3-ipython
 ipython3
 arduino
+vim-gtk3
