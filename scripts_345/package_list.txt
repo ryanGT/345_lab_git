@@ -1,0 +1,13 @@
+python3-numpy
+python3-scipy
+python3-matplotlib
+python3-matplotlib-inline
+jupyter
+jupyter-client
+jupyter-notebook
+python3-jupyter-server
+python3-notebook
+python3-wxgtk4.0
+python3-ipython
+ipython3
+arduino
