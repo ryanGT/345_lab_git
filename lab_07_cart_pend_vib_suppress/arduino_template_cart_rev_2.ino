@@ -201,6 +201,7 @@ void menu(){
   t0 = micros();
   prev_t = t0;
   ISR_Happened = 0;// clear flag and wait for next time step
+  nISR = -1;
   Serial.print("t0 =");
   Serial.println(t0);
   //bdsyscsvlabels
