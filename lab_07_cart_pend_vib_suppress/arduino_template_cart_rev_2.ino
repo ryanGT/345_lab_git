@@ -133,7 +133,7 @@ unsigned long t;
 unsigned long t1;
 unsigned long cur_t;
 float t_ms, t_sec, prev_t, dt;
-float stop_t = 3.0;
+float stop_t = 5.0;
 
 void setup(){
    Serial.begin(230400);
