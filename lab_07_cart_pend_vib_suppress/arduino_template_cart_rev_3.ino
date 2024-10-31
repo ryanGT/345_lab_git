@@ -138,8 +138,8 @@ float stop_t = 5.0;
 void setup(){
    Serial.begin(230400);
    //bdsyswelcomecode
-   
    Serial.println("using rtblockdiagram library");
+   
    mynewline();
 
    motors.enableDrivers();
@@ -192,21 +192,36 @@ void setup(){
 
 
 void menu(){
-  Serial.println("enter any character to start a test");
-  char mychar = get_char();
-  // reset encoders and t0 at the start of a test
-  //enc.encoder_count = 0;
-  //bdsysmenucode
-
-  t0 = micros();
-  prev_t = t0;
-  ISR_Happened = 0;// clear flag and wait for next time step
-  nISR = -1;
-  Serial.print("t0 =");
-  Serial.println(t0);
-  //bdsyscsvlabels
+   // go into a menu loop where only `s` gets you out
+   char mychar ='r';//default to reading the encoder once
+  
+   while (mychar != 's'){
+      if (mychar == 'r'){
+         //bdsysmenu3
+      }
+      else if (mychar == 'z'){
+         //bdsysmenu2
+      }
+      Serial.println("enter r, s, or z:");
+      Serial.println("- r: read the encoder");
+      Serial.println("- s: start a test");
+      Serial.println("- z: zero the encoder");
+      mychar = get_char();
+   }
+   // we should only get here if the user
+   // entered 's'
+   //bdsysmenucode
+    
+   t0 = micros();
+   prev_t = t0;
+   ISR_Happened = 0;// clear flag and wait for next time step
+   nISR = -1;
+   Serial.print("t0 =");
+   Serial.println(t0);
+   //bdsyscsvlabels
+   // reset encoders and t0 at the start of a test
+   //enc.encoder_count = 0;
 }
-
 
 void loop(){
   if (ISR_Happened == 1){
