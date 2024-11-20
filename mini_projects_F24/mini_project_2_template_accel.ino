@@ -33,11 +33,20 @@ THE SOFTWARE.
 
 // I2Cdev and MPU6050 must be installed as libraries, or else the .cpp/.h files
 // for both classes must be in the include path of your project
+#include "I2Cdev.h"
+#include "MPU6050.h"
+
+// Arduino Wire library is required if I2Cdev I2CDEV_ARDUINO_WIRE implementation
+// is used in I2Cdev.h
+#if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+    #include "Wire.h"
+#endif
+
 // class default I2C address is 0x68
 // specific I2C addresses may be passed as a parameter here
 // AD0 low = 0x68 (default for InvenSense evaluation board)
 // AD0 high = 0x69
-
+MPU6050 accelgyro;
 //MPU6050 accelgyro(0x69); // <-- use for AD0 high
 //MPU6050 accelgyro(0x68, &Wire1); // <-- use for AD0 low, but 2nd Wire (TWI/I2C) object
 
@@ -46,16 +55,12 @@ THE SOFTWARE.
 
 #include <kraussserial.h>
 #include <rtblockdiagram.h>
-#include <DualMAX14870MotorShield.h>
-
 // both the libraries above need to be installed on student computers
 // - what is the most efficient way to accomplish that?
 //     - install from zip using the Arduino IDE?
 
 #define encoderPinA 2
-#define encoderPinB 3
-
-#define squarewave_pin 52
+#define squarewave_pin 12
 
 // define custom sensor class to work with MPU6050 az:
 // - from my rtblockdiagram library
@@ -67,36 +72,20 @@ THE SOFTWARE.
 
 
 // this will not be auto-generated
-//class azaccel6050: public sensor{
-//  // a valid sensor class must have a get_reading method with no
-//  // inputs that returns an int (the sensor reading)
-// public:
-//  int16_t ax, ay, az;
-//  MPU6050* accelgyro;
-//
-//  azaccel6050(MPU6050* myaccel){
-//    accelgyro = myaccel;
-//  }
-//
-//  int get_reading(){
-//    accelgyro->getAcceleration(&ax, &ay, &az);
-//    return(az);
-//  }
-//};
-//
-DualMAX14870MotorShield motors;
+class azaccel6050: public sensor{
+  // a valid sensor class must have a get_reading method with no
+  // inputs that returns an int (the sensor reading)
+ public:
+  int16_t ax, ay, az;
+  MPU6050* accelgyro;
 
-class cartmotors: public double_actuator{
-  public:
-   void stop_motors(){
-      motors.setM1Speed(0);
-      motors.setM2Speed(0);
-   }
+  azaccel6050(MPU6050* myaccel){
+    accelgyro = myaccel;
+  }
 
-
-  void send_commands(int speed1, int speed2){
-      motors.setM1Speed(speed1);
-      motors.setM2Speed(speed2);
+  int get_reading(){
+    accelgyro->getAcceleration(&ax, &ay, &az);
+    return(az);
   }
 };
 
@@ -118,28 +107,6 @@ class cartmotors: public double_actuator{
 /* saturation_block sat_block = saturation_block(&PD); */
 
 //bdsysinitcode
-int_constant_block Uconst = int_constant_block(0);
-summing_junction sum_junct = summing_junction();
-PD_control_block D = PD_control_block(1, 0);
-sat2_adjustable_block adj_sat = sat2_adjustable_block(400, -400);
-if_block if_then = if_block();
-greater_than_block gt_block = greater_than_block();
-loop_count_block loop_count = loop_count_block();
-int_constant_block Uconst2 = int_constant_block(1500);
-int_constant_block Uconst3 = int_constant_block(0);
-cartmotors myact = cartmotors();
-encoder_quad_sense encoder_sensor = encoder_quad_sense(encoderPinA, encoderPinB);
-
-void encoder_sensor_isr_A_wrapper() {
-    encoder_sensor.encoderISRA();
-}
-
-void encoder_sensor_isr_B_wrapper() {
-    encoder_sensor.encoderISRB();
-}
-
-plant_with_double_actuator G = plant_with_double_actuator(&myact, &encoder_sensor);
-
 
 //attachInterrupt(0, isr, FALLING);
 int nISR;
@@ -155,24 +122,38 @@ unsigned long t;
 unsigned long t1;
 unsigned long cur_t;
 float t_ms, t_sec, prev_t, dt;
-float stop_t = 5.0;
+float stop_t = 3.0;
 
 void setup(){
    Serial.begin(230400);
    //bdsyswelcomecode
-   Serial.println("auto-generated Arduino code");
-
+   
    Serial.println("using rtblockdiagram library");
-
    mynewline();
-
-   motors.enableDrivers();
-   motors.flipM1(true);
-
-
+   
    pinMode(squarewave_pin, OUTPUT);
 
    // should any of this be auto-generated, or just included in the template?
+    #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
+        Wire.begin();
+    #elif I2CDEV_IMPLEMENTATION == I2CDEV_BUILTIN_FASTWIRE
+        Fastwire::setup(400, true);
+    #endif
+
+    // initialize device
+    Serial.println("Initializing I2C devices...");
+    accelgyro.initialize();
+
+    // verify connection
+    Serial.println("Testing device connections...");
+    Serial.println(accelgyro.testConnection() ? "MPU6050 connection successful" : "MPU6050 connection failed");
+
+
+    accelgyro.setFullScaleAccelRange(MPU6050_ACCEL_FS_8);
+    int read_range = accelgyro.getFullScaleAccelRange();
+    Serial.print("accel range: ");
+    Serial.println(read_range);
+
    //!// encoder pin on interrupt 0 (pin 2)
 
    // here is the setup code I should autogenerate:
@@ -180,94 +161,54 @@ void setup(){
    //HB.setup();
 
    //bdsyssetupcode
-   sum_junct.set_inputs(&Uconst, &G);
-   D.set_input_block1(&sum_junct);
-   adj_sat.set_input_block1(&D);
-   if_then.set_inputs(&gt_block, &adj_sat, &Uconst3);
-   gt_block.set_input_blocks(&loop_count, &Uconst2);
-   attachInterrupt(digitalPinToInterrupt(encoderPinA), encoder_sensor_isr_A_wrapper, CHANGE);
-   attachInterrupt(digitalPinToInterrupt(encoderPinB), encoder_sensor_isr_B_wrapper, CHANGE);
-   pinMode(encoderPinA, INPUT_PULLUP);
-   pinMode(encoderPinB, INPUT_PULLUP);
-   G.set_input_blocks(&if_then, &if_then);
-
 
    //=======================================================
-   // set up the Timer1 interrupt
+   // set up the Timer2 interrupt
    //=======================================================
-   TCCR1A = 0;     // set entire TCCR1A register to 0
-   TCCR1B = 0;     // same for TCCR1B
+   cli();// disable global interrupts temporarily
+   TCCR2A = 0;// set entire TCCR3A register to 0
+   TCCR2B = 0;// same for TCCR3B
+   //TCNT3  = 0;//initialize counter value to 0
+   // set compare match register for 8khz increments
+   OCR2A = 57;// = (16*10^6) / (8000*8) - 1 (must be <255)
+   //OCR2A = 148;// = (16*10^6) / (8000*8) - 1 (must be <255)
+   // turn on CTC mode
+   //TCCR3A |= (1 << WGM31);
+   //TCCR3B = (TCCR3B & 0b11111000) | 0x07;// set prescaler to 1034
+   // taken from here: https://playground.arduino.cc/Main/TimerPWMCheatsheet
+   //        scroll down to "Pins 11 and 3: controlled by timer 3"
+   //TCCR3B = (TCCR3B & 0b11111000) | 0x06;
 
-   // set compare match register to desired timer count:
-   //OCR1A = 15624;
-   //OCR1A = 50;//100 Hz
-   OCR1A = 125;//150ish - seems to work
-   //OCR1A = 77;//200 Hz <-- seems very borderline (might be 184 Hz)
-   //OCR1A = 30;//500 Hz
-   //OCR1A = 15;//1000 Hz
-   //OCR1A = 7;//2000 Hz
-
-
-   // turn on CTC mode:
-   TCCR1B |= (1 << WGM12);
+   TCCR2B |= (1 << WGM12);
 
    // Set CS10 and CS12 bits for 1024 prescaler:
-   // or just CS12 to get 256
-   //TCCR1B |= (1 << CS10);
-   TCCR1B |= (1 << CS12);
+   TCCR2B |= (1 << CS10);
+   TCCR2B |= (1 << CS12);
 
-   // enable timer compare interrupt:
-   TIMSK1 |= (1 << OCIE1A);
-
-
-   //sei();// re-enable global interrupts
+   TIMSK2 |= (1 << OCIE2A);
+   sei();// re-enable global interrupts
    //=======================================================
    menu();
 }
 
 
 void menu(){
-   // go into a menu loop where only `s` gets you out
-   char mychar ='r';//default to reading the encoder once
+  Serial.println("enter any character to start a test");
+  char mychar = get_char();
+  // reset encoders and t0 at the start of a test
+  //enc.encoder_count = 0;
+  //bdsysmenucode
+  
+  //bdsysmenu2
 
-   while (mychar != 's'){
-      if (mychar == 'r'){
-         //bdsysmenu3
-         Serial.print("encoder reading: ");
-         Serial.println(encoder_sensor.encoder_count);
-
-      }
-      else if (mychar == 'z'){
-         //bdsysmenu2
-         encoder_sensor.encoder_count = 0;
-
-      }
-      Serial.println("enter r, s, or z:");
-      Serial.println("- r: read the encoder");
-      Serial.println("- s: start a test");
-      Serial.println("- z: zero the encoder");
-      mychar = get_char();
-   }
-   // we should only get here if the user
-   // entered 's'
-   //bdsysmenucode
-   D.Kp = get_float_with_message_no_pointer("D.Kp");
-   D.Kd = get_float_with_message_no_pointer("D.Kd");
-
-
-   t0 = micros();
-   prev_t = t0;
-   ISR_Happened = 0;// clear flag and wait for next time step
-   nISR = -1;
-   Serial.print("t0 =");
-   Serial.println(t0);
-   //bdsyscsvlabels
-   Serial.print("t_ms,sum_junct,D,adj_sat,gt_block,if_then,G");
-   mynewline();
-
-   // reset encoders and t0 at the start of a test
-   //enc.encoder_count = 0;
+  t0 = micros();
+  prev_t = t0;
+  ISR_Happened = 0;// clear flag and wait for next time step
+  Serial.print("t0 =");
+  Serial.println(t0);
+  //bdsyscsvlabels
 }
+
 
 void loop(){
   if (ISR_Happened == 1){
@@ -282,7 +223,7 @@ void loop(){
     dt = t_sec - prev_t;
 
     if (t_sec > stop_t){
-      G.send_commands(0,0);
+      G.send_command(0);
       menu();
     }
     else{
@@ -292,62 +233,43 @@ void loop(){
       /* raw_motor_speed = PD.get_output(t_sec); */
       /* motor_speed = sat_block.get_output(t_sec); */
       /* G.send_command(motor_speed); */
-
+  
       //bdsysloopcode
-      Uconst.find_output();
-      loop_count.find_output(nISR);
-      Uconst2.find_output();
-      Uconst3.find_output();
-      G.find_output(t_sec);
-      sum_junct.find_output(t_sec);
-      D.find_output(t_sec);
-      adj_sat.find_output(t_sec);
-      gt_block.find_output();
-      if_then.find_output();
-      G.send_commands();
-
-
-
+     
+  
       //HB.send_command(motor_speed);
       // print data
       Serial.print(t_ms);
-
+  
       //bdsysprintcode
-      print_comma_then_int(sum_junct.read_output());
-      print_comma_then_int(D.read_output());
-      print_comma_then_int(adj_sat.read_output());
-      print_comma_then_int(gt_block.read_output());
-      print_comma_then_int(if_then.read_output());
-      print_comma_then_int(G.read_output());
-
-
+  
       //Serial.print(",");
       //Serial.print(dt,8);
       //print_comma_then_int(u.get_output(t_sec));
       //print_comma_then_int(G.get_output(t_sec));
-
+  
       // how do I decide what to print?
       // - all blocks or only some?
       //     - printing all can slow things down
       //     - printing all might be confusing
       // - call the get_output method?
       //     - do I ever need float output?
-
+  
       /* print_comma_then_int(motor_speed); */
       /* print_comma_then_int(raw_motor_speed); */
       /* print_comma_then_int(PD.input_value); */
       /* print_comma_then_float(PD.din_dt); */
       /* print_comma_then_int(G.read_output()); */
-
-
+  
+  
       //Serial.print(",");
       //Serial.print(PD.prev_t,8);
       //Serial.print(",");
       //Serial.print(PD.dt,8);
-
+  
       //print_comma_then_int(enc.get_reading());
       mynewline();
-
+  
       prev_t = t_sec;
       //PD.save_values(t_sec);
      }
@@ -355,7 +277,7 @@ void loop(){
 }
 
 
-ISR(TIMER1_COMPA_vect)
+ISR(TIMER2_COMPA_vect)
 {
   ISR_Happened = 1;
   nISR++;
