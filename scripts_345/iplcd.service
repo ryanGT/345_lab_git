@@ -1,0 +1,10 @@
+[Unit]
+Description=Print IP to LCD
+After=multi-user.target
+
+[Service]
+Type=idle
+ExecStart=/usr/bin/python3 /home/student345/345_lab_git/scripts_345/ip_to_lcd.py
+
+[Install]
+WantedBy=multi-user.target
