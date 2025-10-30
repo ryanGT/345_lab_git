@@ -1,0 +1,20 @@
+actuators
+h_bridge,HB_actuator,in1_pin:6.0,in2_pin:4.0,pwm_pin:9.0
+
+sensors
+encoder,encoder_sensor,pinA:2.0,pinB:11.0,interrupt_number:0.0,sensitivity:1.0
+accelerometer,myaccel,arduino_class:azaccel6050,init_params:&accelgyro
+
+blocks
+block_type,variable_name,label,arduino_class,input_block1_name,input_block2_name,width,height,placement_type,abs_x,abs_y,rel_block_name,rel_pos,rel_distance,xshift,yshift,param1,param2,param3,param4,param5,param6,param7,param8,param9,param10
+plant,G,$G(s)$,plant,sat,,3,2,absolute,0,0,,,,,,actuator_name:HB_actuator,sensor_name:encoder_sensor,,,,,,,,
+plant_no_actuator,G2,$G_{2}$,plant_no_actuator,G,,3,2,relative,,,G,right,6.0,0.0,0.0,sensor_name:myaccel,,,,,,,,,
+saturation_block,sat,sat,saturation_block,D,,3,2,relative,,,G,left,4.0,0.0,0.0,,,,,,,,,,
+PD_controller,D,PD,PD_control_block,sum_junct,,3,2,relative,,,sat,left,4.0,0.0,0.0,Kp:7.0,Kd:0.1,,,,,,,,
+summing_junction,sum_junct,,summing_junction,U,G,2,2,relative,,,D,left,4.0,0.0,0.0,,,,,,,,,,
+swept_sine_input,U,$U_{swept sine}(s)$,swept_sine_input,,,3,2,relative,,,sum_junct,left,6.0,0.0,0.0,slope:0.1,amp:100.0,dead_time:1.0,,,,,,,
+
+menu_params
+stop_t, 0
+U.slope, 0
+U.amp, 0
